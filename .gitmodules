@@ -1,0 +1,3 @@
+[submodule "rose"]
+	path = rose
+	url = git@github.com:tristanvdb/openacc-to-opencl-compiler.git
