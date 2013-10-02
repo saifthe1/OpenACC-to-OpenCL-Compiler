@@ -1,0 +1,30 @@
+
+/*! \mainpage OpenACC to OpenCL C 2.0 Compiler
+ *
+ *  This documentation includes all parts of the OpenACC to OpenCL Compiler. This compiler is build using ROSE Compiler.
+ *  This compiler produce call to an OpenACC implementation, this implementation is documented here.
+ *  The compiler itself is composed of multiple independent modules, all documented here.
+ *
+ *  Multiple File Builder (MFB) abstracts AST into MFB::API and provides associated file mangement
+ *      - it loads files and associate an MFB::API
+ *      - it provides interface to distribute an API and its implementation accross different files.
+ *
+ *  Model Driven Code Generator (MDCG) abstracts MFB::API into (object oriented) MDCG::Model and provides help to go from a MDCG::Model to an API
+ *      - it loads MFB::API and build a MDCG::Model
+ *      - it generates MFB::API from MDCG::Model
+ *
+ *  Kernel from Loop Tree (KLT) generates OpenCL C kernels from the description of a loop nest
+ *      - it produces an API for MFB
+ *      - can be applied to CUDA
+ *
+ *  Directive-based Language eXtension (DLX) is used to extract and translate directives.
+ *  DLX::Directives contains templates based on a language description (see DLX::OpenACC).
+ *  DLX::Frontend produces a Directive Graph, which presents parsed directives in relation with each other. It is specialized by template extensions and language specific specialisations.
+ *      -# parsing the string into "language construct [clause[(args)][, ...]]" where 'args' can include complex C/C++. It could be generated from description.
+ *      -# directives are positioned in relation to the AST. It looks "localy" in the AST.
+ *      -# directives are put in relation with each other. It forms the Directives Graph, specific to the language.
+ *
+ *  DLX::Compiler consumes the Directives Graph and transforms the input code accordingly to the language
+ *      - the OpenACC DLX::Compiler uses MDCG and KLT to transform/produce code
+ */
+

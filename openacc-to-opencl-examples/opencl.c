@@ -25,19 +25,15 @@
 #ifdef ENABLE_PROGRAM_VECT_ADD
 
 #ifndef VECT_ADD_N
-# define VECT_ADD_N 100
-#endif
-
-#ifndef VECT_ADD_DATA_TYPE
-# define VECT_ADD_DATA_TYPE float
+# define VECT_ADD_N 16*64*4*18
 #endif
 
 int program_vector_addition(int argc, char ** argv) {
-  const unsigned long n = VECT_ADD_MACRO_N;
+  const unsigned long n = VECT_ADD_N;
 
-  VECT_ADD_DATA_TYPE a[n];
-  VECT_ADD_DATA_TYPE b[n];
-  VECT_ADD_DATA_TYPE c[n];
+  float a[n];
+  float b[n];
+  float c[n];
 
   unsigned i;
 
@@ -47,27 +43,54 @@ int program_vector_addition(int argc, char ** argv) {
     c[i] = 0.;
   }
 
-  acc_init(acc_build_device(e_acc_device_opencl_default)); ///< Initialise OpenACC Runtime for a default OpenCL device (NOP if acc_init() had already been called)
+// --- BEGINNING OF THE TRANSFORMED CODE ---
 
-  unsigned long region_1_num_gang = ;
-  unsgined long region_1_num_worker = ;
-  acc_parallel_t region_1 = acc_build_parallel(1, &region_1_num_gang, &region_1_num_worker);
+  // Initialise OpenACC Runtime for a default OpenCL device (NOP if acc_init() had already been called)
+  acc_init(acc_build_device(e_acc_device_opencl_default));
 
-  acc_fail_if_error(acc_parallel_init(region_1));
+  unsigned long region_0_num_gang = 16;     // clause num_gang(16)
+  unsigned long region_0_num_worker = 64;   // clause num_worker(64)
+  unsigned long region_0_vector_length = 4; // clause vector_length(4)
 
-  {
+  // construct parallel region descriptor
+  acc_parallel_t region_0 = acc_build_parallel(1, &region_0_num_gang, &region_0_num_worker, region_0_vector_length);
 
-    float * args_copyin[2] = {a, b};
-    float * args_copyout[1] = {res};
-    
-    acc_fail_if_error(acc_kernel_launch());
-    #pragma acc loop
-    for (i = 0; i < n; i++) {
-      res[i] = a[i] + b[i];
-    }
-  }
+  // Start the parallel region
+  acc_fail_if_error(acc_parallel_start(region_0));
 
-  VECT_ADD_DATA_TYPE error = 0.;
+  acc_copyin(a + 0, n); // clause copyin(a[0:n]) : offset 0,           size n
+  acc_copyin(a + 0, n); // clause copyin(b[n])   : offset 0 (default), size n
+
+  { // beginning of the basic block scoped under the parallel directive
+
+    // Create a kernel descriptor
+    acc_kernel_t kernel_0 = acc_build_kernel(0);
+
+      // Set the scalar arg (pointer + size)
+      kernel_0->scalar_arguments[0] = &n;
+      kernel_0->scalar_sizes[0]     = sizeof(n);
+
+      // Set data args using device pointers
+      kernel_0->data_arguments[0] = acc_deviceptr(a);
+      kernel_0->data_arguments[1] = acc_deviceptr(b);
+      kernel_0->data_arguments[2] = acc_deviceptr(c);
+
+    // Enqueue the kernel for the current region
+    acc_fail_if_error(acc_enqueue_kernel(region_0, kernel_0));
+
+  } // end of the basic block scoped under the parallel directive
+
+  acc_copyout(c + 0, n); // clause copyout(c) : offset 0 (default), size n (type_of(c) = float[n])
+
+  // Stop the parallel region
+  acc_fail_if_error(acc_parallel_stop(region_1));
+
+  // Implicit barrier at the end of the parallel region
+  acc_async_wait_all();
+
+// --- END OF THE TRANSFORMED CODE ---
+
+  float error = 0.;
   for (i = 0; i < n; i++) {
     error += (res[i] - (a[i] + b[i])) * (res[i] - (a[i] + b[i]));
   }

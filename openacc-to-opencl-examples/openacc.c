@@ -34,11 +34,11 @@
 #ifdef ENABLE_PROGRAM_VECT_ADD
 
 #ifndef VECT_ADD_N
-# define VECT_ADD_N 16*64*8
+# define VECT_ADD_N 16*64*4*18
 #endif
 
 int program_vector_addition(int argc, char ** argv) {
-  const unsigned long n = VECT_ADD_MACRO_N;
+  const unsigned long n = VECT_ADD_N;
 
   float a[n];
   float b[n];
@@ -52,9 +52,9 @@ int program_vector_addition(int argc, char ** argv) {
     c[i] = 0.;
   }
 
-  #pragma acc parallel copyin(a[0:n], b[n]) copyout(c) num_gangs(16) num_worker(64) vector_length(8)
+  #pragma acc parallel copyin(a[0:n], b[n]) copyout(c) num_gangs(16) num_worker(64) vector_length(4)
   {
-    #pragma acc loop independant gang(16) worker(64) vector(8)
+    #pragma acc loop gang worker vector
     for (i = 0; i < n; i++) {
       res[i] = a[i] + b[i];
     }
