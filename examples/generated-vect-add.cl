@@ -1,21 +1,22 @@
 /*!
- * \file opencl.cl
+ * \file generated-vect-add.cl
  *
  * \author Tristan Vanderbruggen
  * \date 09/2013
  * 
- * This file contains the code generated for "OpenACC to OpenCL Compiler" by "KLT OpenCL" for the file openacc.c, openacc.cpp, and openacc.f
+ * Expected output for vect-add.c
+ * This file is the generated kernel file. It is the result of the translation the content of the parallel and kernel constructs and associated loop constructs.
+ * The generated code is using libopenacc-device, it is a device side runtime implementing OpenACC execution model.
  * 
- * The naming convention used for this file should be followed by the compiler. It will help debugging and change tracking
+ * The naming convention used for this file are to be a guide line for the compiler.
  *
- * Convention for OpenACC and OpenCL terms:
- *     - OpenACC Execution Modes
- *         + GR: Gang Redundant
- *         + GP: Gang Partitionned
- *         + WS: Worker Single
- *         + WP: Worker Partitionned
- *         + VS: Vector Single
- *         + VP: Vector Partitionned
+ * Comments abbreviations:
+ *     - GR: OpenACC Gang   Redundant    Execution Modes
+ *     - GP: OpenACC Gang   Partitionned Execution Modes
+ *     - WS: OpenACC Worker Single       Execution Modes
+ *     - WP: OpenACC Worker Partitionned Execution Modes
+ *     - VS: OpenACC Vector Single       Execution Modes
+ *     - VP: OpenACC Vector Partitionned Execution Modes
  * 
  */
 
@@ -24,7 +25,7 @@
 /*!
  *  OpenCL C kernel for Vector Addition as it would be generated.
  */
-__global void program_vector_addition_kernel_1_vect_8(unsigned long n, float * a, float * b, float * res, __constant acc_context_t ctx) {
+__global void vect_add_kernel_1_vect_8(unsigned long n, float * a, float * b, float * res, __constant acc_context_t ctx) {
 
   // Verify that we are in Gang Partitionned & Worker Partitionned mode 
   if (acc_GP_mode(ctx) && acc_WP_mode(ctx)) {

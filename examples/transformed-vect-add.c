@@ -1,20 +1,15 @@
 /*!
- * \file opencl.c
+ * \file transformed-vect-add.c
  *
  * \author Tristan Vanderbruggen
  * \date 09/2013
  * 
- * This file contains the expected output of "OpenACC to OpenCL Compiler" for the file openacc.c
+ * Expected output for vect-add.c
+ * This file is the transformed application file. Pragmas containing OpenACC Directives have been replaced by calls to the OpenACC API.
  * 
- * The naming convention used for this file should be followed by the compiler. It will help debugging and change tracking
+ * The naming convention used for this file are to be a guide line for the compiler.
  *
  */
-
-#ifdef ENABLE_PROGRAM_VECT_ADD
-# ifndef ENABLE_LIB_CSTDLIB
-#  error "Vector Addition requires C Standard Library"
-# endif
-#endif
 
 #ifdef ENABLE_LIB_CSTDLIB
 # include <cstdlib>
@@ -22,14 +17,16 @@
 
 #include "OpenACC/lib-openacc.h"
 
-#ifdef ENABLE_PROGRAM_VECT_ADD
-
-#ifndef VECT_ADD_N
-# define VECT_ADD_N 16*64*4*18
+#ifndef N
+# define N 16*64*4*18
 #endif
 
-int program_vector_addition(int argc, char ** argv) {
-  const unsigned long n = VECT_ADD_N;
+#ifndef TOLERANCE
+# define TOLERANCE 1e-6
+#endif
+
+int main(int argc, char ** argv) {
+  const unsigned long n = N;
 
   float a[n];
   float b[n];
@@ -95,7 +92,6 @@ int program_vector_addition(int argc, char ** argv) {
     error += (res[i] - (a[i] + b[i])) * (res[i] - (a[i] + b[i]));
   }
 
-  return error < VECT_ADD_C_STYLE_TOLERANCE;
+  return error < TOLERANCE;
 }
 
-#endif
