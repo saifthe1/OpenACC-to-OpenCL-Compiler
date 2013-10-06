@@ -4,7 +4,7 @@
  * \author Tristan Vanderbruggen
  * \date 09/2013
  * 
- * Device side runtime for OpenACC
+ * The object defined in this file are used to communicate informations between host and device runtimes.
  *
  */
 
