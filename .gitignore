@@ -1,6 +1,6 @@
 build/*
 install/*
-doxygen-html/*
+docs/doxygen-html/*
 
 *.o
 
