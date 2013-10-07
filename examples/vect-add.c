@@ -20,7 +20,9 @@
 # include <cstdlib>
 #endif
 
-#include "ACC/acc.h"
+#ifdef _OPENACC_c
+#include "OpenACC/openacc.h"
+#endif
 
 #ifndef N
 # define N 16*64*4*18
@@ -49,13 +51,13 @@ int main(int argc, char ** argv) {
   {
     #pragma acc loop gang worker vector
     for (i = 0; i < n; i++) {
-      res[i] = a[i] + b[i];
+      c[i] = a[i] + b[i];
     }
   }
 
   float error = 0.;
   for (i = 0; i < n; i++) {
-    error += (res[i] - (a[i] + b[i])) * (res[i] - (a[i] + b[i]));
+    error += (c[i] - (a[i] + b[i])) * (c[i] - (a[i] + b[i]));
   }
 
   return error < TOLERANCE;

@@ -15,7 +15,7 @@
 # include <cstdlib>
 #endif
 
-#include "OpenACC/lib-openacc.h"
+#include "OpenACC/libopenacc.h"
 
 #ifndef N
 # define N 16*64*4*18
@@ -43,7 +43,7 @@ int main(int argc, char ** argv) {
 // --- BEGINNING OF THE TRANSFORMED CODE ---
 
   // Initialise OpenACC Runtime for a default OpenCL device (NOP if acc_init() had already been called)
-  acc_init(acc_build_device(e_acc_device_opencl_default));
+  acc_init(acc_get_device_type());
 
   unsigned long region_0_num_gang = 16;     // clause num_gang(16)
   unsigned long region_0_num_worker = 64;   // clause num_worker(64)
@@ -80,7 +80,7 @@ int main(int argc, char ** argv) {
   acc_copyout(c + 0, n); // clause copyout(c) : offset 0 (default), size n (type_of(c) = float[n])
 
   // Stop the parallel region
-  acc_fail_if_error(acc_parallel_stop(region_1));
+  acc_fail_if_error(acc_parallel_stop(region_0));
 
   // Implicit barrier at the end of the parallel region
   acc_async_wait_all();
@@ -89,7 +89,7 @@ int main(int argc, char ** argv) {
 
   float error = 0.;
   for (i = 0; i < n; i++) {
-    error += (res[i] - (a[i] + b[i])) * (res[i] - (a[i] + b[i]));
+    error += (c[i] - (a[i] + b[i])) * (c[i] - (a[i] + b[i]));
   }
 
   return error < TOLERANCE;
