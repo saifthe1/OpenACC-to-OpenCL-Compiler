@@ -1,5 +1,5 @@
 
-/*! \mainpage OpenACC to OpenCL C 2.0 Compiler
+/*! \mainpage OpenACC to OpenCL Package
  *
  *  This documentation includes all parts of the OpenACC to OpenCL Compiler. This compiler is build using ROSE Compiler.
  *  This compiler produce call to an OpenACC implementation, this implementation is documented here.
