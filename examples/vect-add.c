@@ -3,16 +3,8 @@
  *
  * \author Tristan Vanderbruggen
  * \date 09/2013
- * 
- * Part of OpenACC C tests.
  *
- * This example performs the addition of 2 vectors. This example is used as base test for version 0.0.1 of the OpenACC to OpenCL Compiler...
- * It requires to:
- *   - handle copy (in/out, 3 kind of array refs)
- *   - setting gang, worker, and vector sizes
- *   - distributing ONE (1) loop over the three levels of gang, worker, and vector
- *
- * The naming convention is NOT used by the compiler. However, in this file it is required for automated testing and checking of the results.
+ * \note The naming convention is NOT used by the compiler. However, in this file it is required for automated testing and checking of the results.
  *
  */
 

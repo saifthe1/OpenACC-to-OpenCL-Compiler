@@ -4,13 +4,9 @@
  * \author Tristan Vanderbruggen
  * \date 09/2013
  * 
- * Expected output for vect-add.c
- * This file is the generated kernel file. It is the result of the translation the content of the parallel and kernel constructs and associated loop constructs.
- * The generated code is using libopenacc-device, it is a device side runtime implementing OpenACC execution model.
- * 
- * The naming convention used for this file are to be a guide line for the compiler.
+ * \note The naming convention used for this file are to be a guide line for the compiler.
  *
- * Comments abbreviations:
+ * \note Comments abbreviations:
  *     - GR: OpenACC Gang   Redundant    Execution Modes
  *     - GP: OpenACC Gang   Partitionned Execution Modes
  *     - WS: OpenACC Worker Single       Execution Modes
