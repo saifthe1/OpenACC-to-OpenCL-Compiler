@@ -51,7 +51,7 @@ int main(int argc, char ** argv) {
   acc_parallel_t region_0 = acc_build_parallel(1, &region_0_num_gang, &region_0_num_worker, region_0_vector_length);
 
   // Start the parallel region
-  acc_fail_if_error(acc_parallel_start(region_0));
+  acc_parallel_start(region_0);
 
   acc_copyin(a + 0, n); // clause copyin(a[0:n]) : offset 0,           size n
   acc_copyin(a + 0, n); // clause copyin(b[n])   : offset 0 (default), size n
@@ -71,14 +71,14 @@ int main(int argc, char ** argv) {
       kernel_0->data_arguments[2] = acc_deviceptr(c);
 
     // Enqueue the kernel for the current region
-    acc_fail_if_error(acc_enqueue_kernel(region_0, kernel_0));
+    acc_enqueue_kernel(region_0, kernel_0);
 
   } // end of the basic block scoped under the parallel directive
 
   acc_copyout(c + 0, n); // clause copyout(c) : offset 0 (default), size n (type_of(c) = float[n])
 
   // Stop the parallel region
-  acc_fail_if_error(acc_parallel_stop(region_0));
+  acc_parallel_stop(region_0);
 
   // Implicit barrier at the end of the parallel region
   acc_async_wait_all();
