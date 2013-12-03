@@ -3,4 +3,6 @@ install/*
 docs/doxygen-html/*
 
 *.o
+*.so
+*.a
 
