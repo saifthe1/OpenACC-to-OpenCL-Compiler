@@ -1,7 +1,7 @@
 
 all:
 
-check: vect-add vect-add-acc vect-add-acc-ocl
+check: # vect-add vect-add-acc vect-add-acc-ocl
 
 vect-add: vect-add.o
 	gcc vect-add.o -o vect-add
