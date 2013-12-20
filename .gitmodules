@@ -1,3 +1,6 @@
 [submodule "rose"]
 	path = rose
 	url = git@github.com:tristanvdb/rose-for-openacc-to-opencl-compiler.git
+[submodule "docs/doxygen-html"]
+	path = docs/doxygen-html
+	url = git@github.com:tristanvdb/acc2ocl-doxy.git
