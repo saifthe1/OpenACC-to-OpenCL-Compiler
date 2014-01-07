@@ -5,5 +5,5 @@ all:
 check:
 
 clean:
-	rm -rf doxygen-html
+	rm -rf doxygen-html/*
 
