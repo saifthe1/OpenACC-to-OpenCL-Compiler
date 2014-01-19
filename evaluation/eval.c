@@ -33,15 +33,15 @@ int main(int argc, char **argv) {
 
   unsigned g, w, v, s;
 
-  unsigned gang_config_num = 4;
+  unsigned gang_config_num = 5;
   unsigned * gang_configs = malloc(gang_config_num * sizeof(unsigned));
-  gang_configs[0] = 1;
+  gang_configs[0] = 16;
   for (g = 1; g < gang_config_num; g++)
     gang_configs[g] = gang_configs[g - 1] * 2;
 
-  unsigned worker_config_num = 4;
+  unsigned worker_config_num = 6;
   unsigned * worker_configs = malloc(worker_config_num * sizeof(unsigned));
-  worker_configs[0] = 1;
+  worker_configs[0] = 32;
   for (w = 1; w < worker_config_num; w++)
     worker_configs[w] = worker_configs[w - 1] * 2;
 
@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
   for (v = 1; v < vector_config_num; v++)
     vector_configs[v] = vector_configs[v - 1] * 2;
 
-  unsigned size_config_num = 16;
+  unsigned size_config_num = 6;
   unsigned long * size_configs = malloc(size_config_num * sizeof(unsigned long));
-  size_configs[0] = 4 * 1024 * 1024; // 1M >> g*w*v = 2^6 * 2^7 * 2^0 = 8k , it leaves 2^7 to distribute among the filing tiles
+  size_configs[0] = 16 * 1024 * 1024; // 1M >> g*w*v = 2^6 * 2^7 * 2^0 = 8k , it leaves 2^7 to distribute among the filing tiles
   for (s = 1; s < size_config_num; s++)
-    size_configs[s] = size_configs[0] * s;
+    size_configs[s] = size_configs[s-1] * 2;
 
   if (sqlite3_open(argv[1], &db)) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     return(1);
   }
 
-  /// todo set/check acc platform/device
+  acc_set_device_type(acc_device_M2070);
 
   sprintf(
     sql_cmd,
