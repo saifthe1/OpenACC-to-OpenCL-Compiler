@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# This script takes care of the initial building of ROSE for the OpenACC to OpenCL Compiler
+# It can be used after pulling a new version of the main repository.
+# However, in this case, ROSE will be rebuilt from scratch, it will take a long time.
+# If you use a powerfull machine you should change "-j4" by some thing larger (number of parallel processes used by make)
+
+git submodule init
+git submodule update
+
+pushd rose
+./build
+popd
+
+rm -rf rose-build
+mkdir -p rose-build
+pushd build-rose
+./configure --with-boost=@boost_path@
+make -C src -j4
+make -C projects/openacc-to-opencl -j4
+popd
+

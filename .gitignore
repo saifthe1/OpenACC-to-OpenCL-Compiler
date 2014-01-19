@@ -1,6 +1,11 @@
-build/*
-install/*
-docs/doxygen-html/*
+rose-build
+rose-install
+
+evaluation/Makefile
+libopenacc/lib/Makefile
+
+configure
+autom4te.cache
 
 *.o
 *.so
