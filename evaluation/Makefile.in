@@ -26,10 +26,10 @@ init_db: init_db.o
 #
 
 synthesis.o: synthesis.c
-	gcc -I$(SQLITE_INC_PATH)/include -c $^ -o $@
+	gcc -I$(SQLITE_INC_PATH) -c $^ -o $@
 
 synthesis: synthesis.o
-	gcc -L$(SQLITE_LIB_PATH)/lib -lsqlite3 $^ -o $@
+	gcc -L$(SQLITE_LIB_PATH) -lsqlite3 $^ -o $@
 
 #
 
