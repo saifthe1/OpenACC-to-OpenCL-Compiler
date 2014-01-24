@@ -1,5 +1,5 @@
 
-TESTS_PATH=../rose/projects/openacc-to-opencl/tests
+TESTS_PATH=../tests
 OPENACC_PATH=../libopenacc
 
 SQLITE_INC_PATH=@sqlite_inc_path@

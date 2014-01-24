@@ -14,7 +14,7 @@ popd
 
 rm -rf rose-build
 mkdir -p rose-build
-pushd build-rose
+pushd rose-build
 ../rose/configure --with-ROSE_LONG_MAKE_CHECK_RULE=yes --with-C_OPTIMIZE=-O0 --with-CXX_OPTIMIZE=-O0 --with-boost=@boost_path@ --disable-java --disable-fortran
 make -C src -j4
 make -C projects/openacc-to-opencl -j4
