@@ -1,0 +1,16 @@
+
+all:
+	make -C 101 all
+	make -C 102 all
+	make -C 103 all
+
+check:
+	make -C 101 check
+	make -C 102 check
+	make -C 103 check
+
+clean:
+	make -C 101 clean
+	make -C 102 clean
+	make -C 103 clean
+

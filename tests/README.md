@@ -21,7 +21,7 @@ List:
  * 101-vector-constant-addition     : Adds constant value to each elements of an array, ~ **n** ops
  * 102-vector-constant-product      : Multiplies each elements of an array by a constant, ~ **n** ops
  * 103-vector-vector-addition       : Computes the sum of two vectors, ~ **n** ops
- * 104-saxpi                        : TODO y[i] = alpha*x[i] + y[i], ~ **n** ops
+ * 104-saxpi                        : TODO y[i] = alpha\*x[i] + y[i], ~ **n** ops
  * 105-vector-vector-multiplication : TODO Computes the product of the elements of two vectors, ~ **n** ops
  * 106-matrix-matrix-addition       : TODO Computes the sum of two matrices, ~ **n.m** ops
  * 105-vector-vector-product        : TODO Computes the scalar product of two vectors, ~ **n + log(n)** ops

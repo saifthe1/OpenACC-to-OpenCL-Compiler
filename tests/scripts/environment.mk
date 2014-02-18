@@ -25,7 +25,7 @@ MAKE=make
 
 HOST_ENV_MACRO= \
   -DACC_RUNTIME_ABS_DIR=\"$(OPENACC_DIR)\" \
-  -DACC_KERNELS_ABS_DIR=\"$(abs_srcdir)\"
+  -DACC_KERNELS_ABS_DIR=\"$(KERNEL_DIR)\"
 
 ACC_INTERNAL_DEPS= \
   $(OPENACC_INC_DIR)/OpenACC/internal/compiler.h \
