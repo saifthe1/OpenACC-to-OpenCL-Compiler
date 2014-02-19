@@ -11,8 +11,8 @@ typedef struct acc_region_t_ * acc_region_t;
 extern struct acc_kernel_desc_t_ kernel_0x00_desc;
 extern struct acc_region_desc_t_ region_0x00_desc;
 
-void kernel_102(
-  unsigned long n, float * a, float scalar,
+void kernel_101(
+  unsigned long n, float * a, float offset,
   unsigned long num_gang, unsigned long num_worker, unsigned long vector_length,
   acc_timer_t data_timer, acc_timer_t comp_timer
 ) {
@@ -30,9 +30,13 @@ void kernel_102(
 
     acc_region_t region_0 = acc_build_region(&region_0x00_desc);
 
-      region_0->devices[0].num_gang = num_gang;
-      region_0->devices[0].num_worker = num_worker;
-      region_0->devices[0].vector_length = vector_length;
+      region_0->devices[0].num_gang = 16;
+      region_0->devices[0].num_worker = 1024;
+      region_0->devices[0].vector_length = 1;
+
+      region_0->devices[1].num_gang = 32;
+      region_0->devices[1].num_worker = 128;
+      region_0->devices[1].vector_length = 1;
 
     acc_region_start(region_0); // construct parallel start
 
@@ -42,7 +46,7 @@ void kernel_102(
       acc_kernel_t kernel_0 = acc_build_kernel(&kernel_0x00_desc);
 
       // Set scalar arguments
-      kernel_0->scalar_ptrs[0] = &scalar;
+      kernel_0->scalar_ptrs[0] = &offset;
 
       // Set data arguments
       kernel_0->data_ptrs[0] = acc_deviceptr(a);
@@ -51,6 +55,11 @@ void kernel_102(
       kernel_0->loops[0]->lower = 0;
       kernel_0->loops[0]->upper = n;
       kernel_0->loops[0]->stride = 1;
+
+      // Configure Loop's Splitter
+      kernel_0->splitters[0]->mode = e_contiguous;
+      kernel_0->splitters[0]->params.contiguous.portions[0] = 3;
+      kernel_0->splitters[0]->params.contiguous.portions[1] = 2;
 
       // Enqueue the kernel for the current region
       acc_enqueue_kernel(region_0, kernel_0);

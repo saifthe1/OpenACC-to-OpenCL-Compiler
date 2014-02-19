@@ -27,12 +27,12 @@ void kernel_101(
   { // (1)
 
     acc_timer_start(comp_timer);
+ 
+    acc_region_t region_0 = acc_build_region(&region_0x00_desc);
 
-    // Initialize parallel region
-    unsigned long region_0_num_gang = num_gang;           // clause num_gang(num_gang)
-    unsigned long region_0_num_worker = num_worker;       // clause num_worker(num_worker)
-    unsigned long region_0_vector_length = vector_length; // clause vector_length(vector_length)    
-    acc_region_t region_0 = acc_build_region(&region_0x00_desc, 1, &region_0_num_gang, &region_0_num_worker, region_0_vector_length);
+      region_0->devices[0].num_gang = num_gang;
+      region_0->devices[0].num_worker = num_worker;
+      region_0->devices[0].vector_length = vector_length;
 
     acc_region_start(region_0); // construct parallel start
 

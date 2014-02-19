@@ -49,9 +49,13 @@ Related files:
 
 ## Tests level 2
 
-Multiple kernels in one region.
-
 List:
  * 201-matrix-matrix-vector-product : TODO Computes the product of two matrices _n,p_ and _p,m_ and a vector _m_, ~ **n.m.p + n.m.log(p) + n.m + n.log(m)** ops
+
+## Tests level 5
+
+Proposed features for OpenACC
+ * 501-multi-devices : tests for loop spliting across multiple devices
+
 
 

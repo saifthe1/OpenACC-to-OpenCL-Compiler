@@ -94,15 +94,22 @@ struct acc_kernel_version_t_ kernel_0x00_v3 = {
 
 /// Kernel descriptor
 
-acc_kernel_version_t kernel_0x00_versions[1] = {
 #if KERNEL_VERSION == 1
+acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v1
-#elif KERNEL_VERSION == 2
-  &kernel_0x00_v2
-#elif KERNEL_VERSION == 3
-  &kernel_0x00_v3
-#endif
 };
+unsigned tiles[4] = {0, 1, 1, 1};
+#elif KERNEL_VERSION == 2
+acc_kernel_version_t kernel_0x00_versions[1] = {
+  &kernel_0x00_v2
+};
+unsigned tiles[4] = {1, 0, 1, 1};
+#elif KERNEL_VERSION == 3
+acc_kernel_version_t kernel_0x00_versions[1] = {
+  &kernel_0x00_v3
+};
+unsigned tiles[4] = {1, 1, 0, 1};
+#endif
 
 struct acc_kernel_desc_t_ kernel_0x00_desc = {
   0,
@@ -120,7 +127,8 @@ struct acc_region_desc_t_ region_0x00_desc = {
   0,
   "103-kernels.cl",
   0, NULL,
-  1, region_0x00_kernels
+  1, region_0x00_kernels,
+  1, NULL
 };
 
 acc_region_desc_t regions[1] = { &region_0x00_desc };

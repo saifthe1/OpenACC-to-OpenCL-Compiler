@@ -1,0 +1,10 @@
+param(n, unsigned)
+scalar(offset, float)
+data(a, float, section(1, 0, n), acc(present_or_copy))
+region(
+  acc(devices(acc_nvidia_device, 0, acc_xeonphi_device, 0)),
+  loop(
+    i, 0, n, acc(gang, worker, split(contiguous, 3, 2)),
+    stmt(a[i]+=offset;)
+  )
+)

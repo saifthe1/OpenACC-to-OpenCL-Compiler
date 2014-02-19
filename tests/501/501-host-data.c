@@ -113,24 +113,31 @@ unsigned tiles[4] = {1, 1, 0, 1};
 
 const size_t kernel_0x00_scalar_sizes[1] = { sizeof(float) };
 
+unsigned kernel_0x00_splitted_loops[1] = { 0 };
+
 struct acc_kernel_desc_t_ kernel_0x00_desc = {
   0,
-  "kernel_102",
+  "kernel_101",
   1, kernel_0x00_scalar_sizes,
   1,
   1,
   1, kernel_0x00_versions,
-  0, NULL
+  1, kernel_0x00_splitted_loops
 };
 
 acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_0x00_desc };
 
+struct {
+  acc_device_t kind;
+  size_t num;
+} dev_list[2] = { {acc_device_nvidia, 0}, {acc_device_xeonphi, 0} };
+
 struct acc_region_desc_t_ region_0x00_desc = {
   0,
-  "102-kernels.cl",
+  "501-kernels.cl",
   0, NULL,
   1, region_0x00_kernels,
-  1, NULL
+  2, dev_list
 };
 
 acc_region_desc_t regions[1] = { &region_0x00_desc };
