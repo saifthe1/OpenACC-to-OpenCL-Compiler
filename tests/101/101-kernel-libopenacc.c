@@ -4,6 +4,7 @@
 #include "OpenACC/private/kernel.h"
 #include "OpenACC/private/loop.h"
 #include "OpenACC/private/data-env.h"
+#include "OpenACC/private/memory.h"
 
 typedef struct acc_kernel_t_ * acc_kernel_t;
 typedef struct acc_region_t_ * acc_region_t;
@@ -25,14 +26,16 @@ void kernel_101(
   acc_copyin(a, n * sizeof(float)); // clause copy(a[0:n])
 
   { // (1)
-
-    acc_timer_start(comp_timer);
  
     acc_region_t region_0 = acc_build_region(&region_0x00_desc);
 
       region_0->devices[0].num_gang = num_gang;
       region_0->devices[0].num_worker = num_worker;
       region_0->devices[0].vector_length = vector_length;
+
+    acc_present_or_copyin_regions_(region_0, a, n * sizeof(float));
+
+    acc_timer_start(comp_timer);
 
     acc_region_start(region_0); // construct parallel start
 
@@ -45,7 +48,7 @@ void kernel_101(
       kernel_0->scalar_ptrs[0] = &offset;
 
       // Set data arguments
-      kernel_0->data_ptrs[0] = acc_deviceptr(a);
+      kernel_0->data_ptrs[0] = a;
 
       // Configure the loop
       kernel_0->loops[0]->lower = 0;
@@ -60,6 +63,8 @@ void kernel_101(
     acc_region_stop(region_0); // construct parallel stop
 
     acc_timer_stop(comp_timer);
+
+    acc_present_or_copyout_regions_(region_0, a, n * sizeof(float));
 
   } // (1)
 

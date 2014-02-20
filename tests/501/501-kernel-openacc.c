@@ -17,7 +17,7 @@ void kernel_101(
                          devices(acc_nvidia_device, 0, acc_xeonphi_device, 0) \
                          num_gangs(16, 32) num_workers(1024, 128) vector_length(1, 1)
     { // (2)
-      #pragma acc loop gang worker vector split(contiguous, 3, 2)
+      #pragma acc loop gang worker vector split(contiguous, 3, 2) read(a, IDENTITY) write(a, IDENTITY)
       for (i = 0; i < n; i++)
         a[i] += offset;
     } // (2)

@@ -5,6 +5,7 @@
  *
  */
 
+#include "OpenACC/openacc.h"
 #include "OpenACC/internal/compiler.h"
 #include "OpenACC/internal/region.h"
 #include "OpenACC/internal/kernel.h"
@@ -32,7 +33,7 @@
 
 /// Dynamic gang, worker, and tile 0 ; tile 1, 2, 3, and vector are empty
 
-struct acc_loop_t_ kernel_0x00_v1_loops[1] = {
+const struct acc_loop_t_ kernel_0x00_v1_loops[1] = {
   {
     (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!< Filing Tile 0 : dynamic
     (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
@@ -44,7 +45,7 @@ struct acc_loop_t_ kernel_0x00_v1_loops[1] = {
   }
 };
 
-struct acc_kernel_version_t_ kernel_0x00_v1 = {
+const struct acc_kernel_version_t_ kernel_0x00_v1 = {
   0, 0, 1, kernel_0x00_v1_loops, "_gang_worker_tile_0"
 };
 
@@ -54,7 +55,7 @@ struct acc_kernel_version_t_ kernel_0x00_v1 = {
 
 /// Dynamic gang, worker, and tile 1 ; tile 0, 2, 3, and vector are empty
 
-struct acc_loop_t_ kernel_0x00_v2_loops[1] = {
+const struct acc_loop_t_ kernel_0x00_v2_loops[1] = {
   {
     (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 0 : static = 1
     (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
@@ -66,7 +67,7 @@ struct acc_loop_t_ kernel_0x00_v2_loops[1] = {
   }
 };
 
-struct acc_kernel_version_t_ kernel_0x00_v2 = {
+const struct acc_kernel_version_t_ kernel_0x00_v2 = {
   0, 0, 1, kernel_0x00_v2_loops, "_gang_worker_tile_1"
 };
 
@@ -76,7 +77,7 @@ struct acc_kernel_version_t_ kernel_0x00_v2 = {
 
 /// Dynamic gang, worker, and tile 2 ; tile 0, 1, 3, and vector are empty
 
-struct acc_loop_t_ kernel_0x00_v3_loops[1] = {
+const struct acc_loop_t_ kernel_0x00_v3_loops[1] = {
   {
     (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 0 : static = 1
     (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
@@ -88,24 +89,24 @@ struct acc_loop_t_ kernel_0x00_v3_loops[1] = {
   }
 };
 
-struct acc_kernel_version_t_ kernel_0x00_v3 = {
+const struct acc_kernel_version_t_ kernel_0x00_v3 = {
   0, 0, 1, kernel_0x00_v3_loops, "_gang_worker_tile_2"
 };
 
 /// Kernel descriptor
 
 #if KERNEL_VERSION == 1
-acc_kernel_version_t kernel_0x00_versions[1] = {
+const acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v1
 };
 unsigned tiles[4] = {0, 1, 1, 1};
 #elif KERNEL_VERSION == 2
-acc_kernel_version_t kernel_0x00_versions[1] = {
+const acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v2
 };
 unsigned tiles[4] = {1, 0, 1, 1};
 #elif KERNEL_VERSION == 3
-acc_kernel_version_t kernel_0x00_versions[1] = {
+const acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v3
 };
 unsigned tiles[4] = {1, 1, 0, 1};
@@ -113,34 +114,39 @@ unsigned tiles[4] = {1, 1, 0, 1};
 
 const size_t kernel_0x00_scalar_sizes[1] = { sizeof(float) };
 
-unsigned kernel_0x00_splitted_loops[1] = { 0 };
+unsigned portions[2] = {3,2};
 
-struct acc_kernel_desc_t_ kernel_0x00_desc = {
+const struct acc_loop_splitter_t_ kernel_0x00_splitted_loop = { 0, e_contiguous, 2, portions, 0 };
+
+const struct acc_kernel_desc_t_ kernel_0x00_desc = {
   0,
   "kernel_101",
   1, kernel_0x00_scalar_sizes,
   1,
   1,
   1, kernel_0x00_versions,
-  1, kernel_0x00_splitted_loops
+  &kernel_0x00_splitted_loop
 };
 
-acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_0x00_desc };
+const acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_0x00_desc };
 
-struct {
+const struct {
   acc_device_t kind;
   size_t num;
 } dev_list[2] = { {acc_device_nvidia, 0}, {acc_device_xeonphi, 0} };
 
-struct acc_region_desc_t_ region_0x00_desc = {
+const struct acc_data_distribution_t_ region_0x00_data_dist = { e_contiguous, 2, portions, 0 };
+
+const struct acc_region_desc_t_ region_0x00_desc = {
   0,
   "501-kernels.cl",
   0, NULL,
   1, region_0x00_kernels,
-  2, dev_list
+  2, dev_list,
+  1, &region_0x00_data_dist
 };
 
-acc_region_desc_t regions[1] = { &region_0x00_desc };
+const acc_region_desc_t regions[1] = { &region_0x00_desc };
 
 acc_compiler_data_t compiler_data = {
   (const char * ) ACC_RUNTIME_ABS_DIR, /* Absolute directory for OpenACC runtime (needed to compile OpenCL C codes) */

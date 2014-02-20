@@ -272,7 +272,7 @@ struct acc_kernel_desc_t_ kernel_0x00_desc = {
   1,
   1,
   1, kernel_0x00_versions,
-  0, NULL
+  NULL
 };
 
 acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_0x00_desc };
@@ -282,7 +282,8 @@ struct acc_region_desc_t_ region_0x00_desc = {
   "101-kernels.cl",
   0, NULL,
   1, region_0x00_kernels,
-  1, NULL
+  1, NULL,
+  0, NULL
 };
 
 acc_region_desc_t regions[1] = { &region_0x00_desc };
