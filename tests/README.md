@@ -21,7 +21,7 @@ List:
  * 101-vector-constant-addition     : Adds constant value to each elements of an array, ~ **n** ops
  * 102-vector-constant-product      : Multiplies each elements of an array by a constant, ~ **n** ops
  * 103-vector-vector-addition       : Computes the sum of two vectors, ~ **n** ops
- * 104-saxpi                        : TODO y[i] = alpha*x[i] + y[i], ~ **n** ops
+ * 104-saxpi                        : TODO y[i] = alpha\*x[i] + y[i], ~ **n** ops
  * 105-vector-vector-multiplication : TODO Computes the product of the elements of two vectors, ~ **n** ops
  * 106-matrix-matrix-addition       : TODO Computes the sum of two matrices, ~ **n.m** ops
  * 105-vector-vector-product        : TODO Computes the scalar product of two vectors, ~ **n + log(n)** ops
@@ -49,9 +49,13 @@ Related files:
 
 ## Tests level 2
 
-Multiple kernels in one region.
-
 List:
  * 201-matrix-matrix-vector-product : TODO Computes the product of two matrices _n,p_ and _p,m_ and a vector _m_, ~ **n.m.p + n.m.log(p) + n.m + n.log(m)** ops
+
+## Tests level 5
+
+Proposed features for OpenACC
+ * 501-multi-devices : tests for loop spliting across multiple devices
+
 
 
