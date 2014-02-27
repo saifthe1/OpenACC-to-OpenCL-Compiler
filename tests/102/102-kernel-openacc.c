@@ -1,4 +1,6 @@
 
+#include "OpenACC/utils/timer.h"
+
 void kernel_102(
   unsigned long n, float * a, float scalar,
   unsigned long num_gang, unsigned long num_worker, unsigned long vector_length,
@@ -15,7 +17,7 @@ void kernel_102(
 
     #pragma acc parallel num_gang(num_gang) num_worker(num_worker) vector_length(vector_length)
     { // (2)
-      #pragma acc loop gang worker vector
+      #pragma acc loop gang worker
       for (i = 0; i < n; i++)
         a[i] *= scalar;
     } // (2)

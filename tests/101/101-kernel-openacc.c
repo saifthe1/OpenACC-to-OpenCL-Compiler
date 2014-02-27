@@ -1,4 +1,6 @@
 
+#include "OpenACC/utils/timer.h"
+
 void kernel_101(
   unsigned long n, float * a, float offset,
   unsigned long num_gang, unsigned long num_worker, unsigned long vector_length,
@@ -15,7 +17,7 @@ void kernel_101(
 
     #pragma acc parallel present_or_copy(a[0:n]) num_gang(num_gang) num_worker(num_worker) vector_length(vector_length)
     { // (2)
-      #pragma acc loop gang worker vector
+      #pragma acc loop gang worker
       for (i = 0; i < n; i++)
         a[i] += offset;
     } // (2)

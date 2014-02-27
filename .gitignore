@@ -21,3 +21,12 @@ evaluation/eval-101-t2
 evaluation/init_db
 evaluation/synthesis
 
+tests/001/Makefile
+tests/101/Makefile
+tests/102/Makefile
+tests/103/Makefile
+tests/501/Makefile
+
+tests/scripts/100-rules.mk
+tests/scripts/environment.mk
+

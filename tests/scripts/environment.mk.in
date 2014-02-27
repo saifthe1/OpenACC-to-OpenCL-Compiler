@@ -13,13 +13,13 @@ LIBS+=-L$(OPENACC_LIB_DIR) -l$(OPENACC_LIB_NAME) -l$(OPENCL_LIB_NAME) -lrt
 DEPS=$(OPENACC_LIB_FILE)
 
 CC=gcc
-CFLAGS+=-g -fno-stack-protector
+CFLAGS+=-g -fno-stack-protector -I@opencl_inc_path@
 
 CXX=g++
 CXXFLAGS+=
 
 LD=g++
-LDFLAGS+=
+LDFLAGS+=-L@opencl_lib_path@ -lopencl
 
 MAKE=make
 
