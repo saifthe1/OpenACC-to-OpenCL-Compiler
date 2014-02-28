@@ -19,7 +19,7 @@ CXX=g++
 CXXFLAGS+=
 
 LD=g++
-LDFLAGS+=-L@opencl_lib_path@ -lopencl
+LDFLAGS+=-L@opencl_lib_path@ -lOpenCL
 
 MAKE=make
 

@@ -33,15 +33,7 @@
 /// Dynamic gang, worker, and tile 0 ; tile 1, 2, 3, and vector are empty
 
 struct acc_loop_t_ kernel_0x00_v1_loops[1] = {
-  {
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!< Filing Tile 0 : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 1 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static_stride   , 1 , 0 }, ///!< Worker Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }, ///!< Filing Tile 2 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }, ///!< Vector Tile   : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }  ///!< Filing Tile 3 : static = 1
-  }
+  { 0,0,1,0,1,1,1 }
 };
 
 struct acc_kernel_version_t_ kernel_0x00_v1 = {
@@ -55,15 +47,7 @@ struct acc_kernel_version_t_ kernel_0x00_v1 = {
 /// Dynamic gang, worker, and tile 1 ; tile 0, 2, 3, and vector are empty
 
 struct acc_loop_t_ kernel_0x00_v2_loops[1] = {
-  {
-    (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 0 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!< Filing Tile 1 : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static_stride   , 1 , 0 }, ///!< Worker Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }, ///!< Filing Tile 2 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }, ///!< Vector Tile   : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }  ///!< Filing Tile 3 : static = 1
-  }
+  { 1,0,0,0,1,1,1 }
 };
 
 struct acc_kernel_version_t_ kernel_0x00_v2 = {
@@ -77,15 +61,7 @@ struct acc_kernel_version_t_ kernel_0x00_v2 = {
 /// Dynamic gang, worker, and tile 2 ; tile 0, 1, 3, and vector are empty
 
 struct acc_loop_t_ kernel_0x00_v3_loops[1] = {
-  {
-    (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 0 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!<   Gang Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static_iteration, 0 , 1 }, ///!< Filing Tile 1 : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_dynamic         , 0 , 0 }, ///!< Worker Tile   : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static_stride   , 1 , 0 }, ///!< Filing Tile 2 : dynamic
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }, ///!< Vector Tile   : static = 1
-    (struct acc_loop_tile_t_){ e_tiling_static          , 1 , 1 }  ///!< Filing Tile 3 : static = 1
-  }
+  { 1,0,1,0,0,1,1 }
 };
 
 struct acc_kernel_version_t_ kernel_0x00_v3 = {
