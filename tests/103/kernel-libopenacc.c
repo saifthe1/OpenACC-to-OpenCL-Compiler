@@ -37,7 +37,7 @@ void kernel_103(
 
     acc_timer_start(comp_timer);
 
-    acc_region_t region_0 = acc_build_region(&region_0x00_desc);
+    acc_region_t region_0 = acc_build_region(&region_desc_0);
 
       region_0->devices[0].num_gang = num_gang;
       region_0->devices[0].num_worker = num_worker;
@@ -50,7 +50,7 @@ void kernel_103(
     { // (2)
 
       // Create a kernel descriptor
-      acc_kernel_t kernel_0 = acc_build_kernel(&kernel_0x00_desc);
+      acc_kernel_t kernel_0 = acc_build_kernel(&kernel_desc_0_0);
 
       // Set data arguments
       kernel_0->data_ptrs[0] = a;

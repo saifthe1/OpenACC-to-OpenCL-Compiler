@@ -9,7 +9,6 @@ check:
 	make -C 101 check
 	make -C 102 check
 	make -C 103 check
-	make -C 501 check
 
 clean:
 	make -C 101 clean

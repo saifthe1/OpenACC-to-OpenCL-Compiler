@@ -74,22 +74,20 @@ struct acc_kernel_version_t_ kernel_0x00_v3 = {
 acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v1
 };
-unsigned tiles[4] = {0, 1, 1, 1};
 #elif KERNEL_VERSION == 2
 acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v2
 };
-unsigned tiles[4] = {1, 0, 1, 1};
 #elif KERNEL_VERSION == 3
 acc_kernel_version_t kernel_0x00_versions[1] = {
   &kernel_0x00_v3
 };
-unsigned tiles[4] = {1, 1, 0, 1};
 #endif
 
-struct acc_kernel_desc_t_ kernel_0x00_desc = {
+struct acc_kernel_desc_t_ kernel_desc_0_0 = {
   0,
   "kernel_103",
+  0, NULL,
   0, NULL,
   3,
   1,
@@ -97,17 +95,17 @@ struct acc_kernel_desc_t_ kernel_0x00_desc = {
   0, NULL
 };
 
-acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_0x00_desc };
+acc_kernel_desc_t region_0x00_kernels[1] = { &kernel_desc_0_0 };
 
-struct acc_region_desc_t_ region_0x00_desc = {
+struct acc_region_desc_t_ region_desc_0 = {
   0,
-  "103-kernels.cl",
+  "kernels.cl",
   0, NULL,
   1, region_0x00_kernels,
   1, NULL
 };
 
-acc_region_desc_t regions[1] = { &region_0x00_desc };
+acc_region_desc_t regions[1] = { &region_desc_0 };
 
 acc_compiler_data_t compiler_data = {
   (const char * ) ACC_RUNTIME_ABS_DIR, /* Absolute directory for OpenACC runtime (needed to compile OpenCL C codes) */

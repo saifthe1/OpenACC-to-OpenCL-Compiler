@@ -4,43 +4,43 @@ KERNEL_DIR=$(TOP_DIR)/tests/$(TEST_ID)
 
 include ../scripts/environment.mk
 
-all: $(TEST_ID)-libopenacc $(TEST_ID)-reference
+all: libopenacc reference
 
-check: $(TEST_ID)-libopenacc $(TEST_ID)-libopenacc $(TEST_ID)-reference
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OPENACC_LIB_DIR) ./$(TEST_ID)-libopenacc $(NBR_GANG) $(NBR_WORKER) $(NBR_VECTOR) $(TEST_PARAMS)
+check: libopenacc libopenacc reference
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OPENACC_LIB_DIR) ./libopenacc $(NBR_GANG) $(NBR_WORKER) $(NBR_VECTOR) $(TEST_PARAMS)
 	@echo
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OPENACC_LIB_DIR) ./$(TEST_ID)-reference 1 1 1 $(TEST_PARAMS)
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OPENACC_LIB_DIR) ./reference 1 1 1 $(TEST_PARAMS)
 	@echo
 
 clean:
-	rm -f *.o $(TEST_ID)-libopenacc* $(TEST_ID)-reference
+	rm -f *.o libopenacc* reference
 
-$(TEST_ID)-libopenacc: $(TEST_ID)-libopenacc.o $(TEST_ID)-host-data.o $(DEPS)
-	$(LD) $(LDFLAGS) $(LIBS) $(TEST_ID)-libopenacc.o $(LIBS) $(TEST_ID)-host-data.o -o $(TEST_ID)-libopenacc
+libopenacc: libopenacc.o host-data.o $(DEPS)
+	$(LD) $(LDFLAGS) $(LIBS) libopenacc.o $(LIBS) host-data.o -o libopenacc
 
-$(TEST_ID)-libopenacc.o: \
-            ../100-main.c $(TEST_ID)-kernel-libopenacc.c $(TEST_ID)-init.c \
+libopenacc.o: \
+            ../100-main.c kernel-libopenacc.c init.c \
             $(ACC_PUBLIC_DEPS) $(ACC_PRIVATE_DEPS)
 	$(CXX) $(CFLAGS) $(INCLUDES) \
 	  -DOPENACC -DOPENACC_TIMER \
-	  -DKERNEL_FILE=\"$(KERNEL_DIR)/$(TEST_ID)-kernel-libopenacc.c\" \
-	  -DINIT_FILE=\"$(KERNEL_DIR)/$(TEST_ID)-init.c\" \
-	  -c ../100-main.c -o $(TEST_ID)-libopenacc.o
+	  -DKERNEL_FILE=\"$(KERNEL_DIR)/kernel-libopenacc.c\" \
+	  -DINIT_FILE=\"$(KERNEL_DIR)/init.c\" \
+	  -c ../100-main.c -o libopenacc.o
 
-$(TEST_ID)-host-data.o: $(TEST_ID)-host-data.c $(ACC_INTERNAL_DEPS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(HOST_ENV_MACRO) -c $(TEST_ID)-host-data.c -o $(TEST_ID)-host-data.o
+host-data.o: host-data.c $(ACC_INTERNAL_DEPS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(HOST_ENV_MACRO) -c host-data.c -o host-data.o
 
-$(TEST_ID)-reference: $(TEST_ID)-reference.o $(OPENACC_LIB_DIR)/utils/timer.o
-	$(LD) $(LDFLAGS) -lrt $(OPENACC_LIB_DIR)/utils/timer.o $(TEST_ID)-reference.o -o $(TEST_ID)-reference
+reference: reference.o $(OPENACC_LIB_DIR)/utils/timer.o
+	$(LD) $(LDFLAGS) -lrt $(OPENACC_LIB_DIR)/utils/timer.o reference.o -o reference
 
-$(TEST_ID)-reference.o: \
-            ../100-main.c $(TEST_ID)-kernel-openacc.c $(TEST_ID)-init.c \
+reference.o: \
+            ../100-main.c kernel-openacc.c init.c \
             $(ACC_PUBLIC_DEPS) $(ACC_PRIVATE_DEPS)
 	$(CXX) $(CFLAGS) $(INCLUDES) \
 	  -DOPENACC_TIMER \
-	  -DKERNEL_FILE=\"$(KERNEL_DIR)/$(TEST_ID)-kernel-openacc.c\" \
-	  -DINIT_FILE=\"$(KERNEL_DIR)/$(TEST_ID)-init.c\" \
-	  -c ../100-main.c -o $(TEST_ID)-reference.o
+	  -DKERNEL_FILE=\"$(KERNEL_DIR)/kernel-openacc.c\" \
+	  -DINIT_FILE=\"$(KERNEL_DIR)/init.c\" \
+	  -c ../100-main.c -o reference.o
 
 # LibOpenACC dependency
 
