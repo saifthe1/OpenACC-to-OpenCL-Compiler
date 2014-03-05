@@ -58,3 +58,5 @@ AC_OUTPUT(tests/scripts/100-rules.mk)
 AC_OUTPUT(tests/scripts/environment.mk)
 AC_OUTPUT(rose.sh)
 
+chmod +x rose.sh
+
