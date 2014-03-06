@@ -1,4 +1,4 @@
-param(n, unsigned)
+param(n, int)
 data(a, float, section(1, 0, n), acc(copyin))
 data(b, float, section(1, 0, n), acc(copyin))
 data(c, float, section(1, 0, n), acc(copyout))

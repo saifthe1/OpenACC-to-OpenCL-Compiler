@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export TOP_DIR=/media/ssd/projects/currents/openacc-to-opencl-compiler
+export TOP_DIR=/home/tristanvdb/projects/acc2ocl/
 
 export OPENACC_INC_PATH=$TOP_DIR/libopenacc/include
 

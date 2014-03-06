@@ -56,6 +56,7 @@ AC_OUTPUT(tests/103/Makefile)
 AC_OUTPUT(tests/501/Makefile)
 AC_OUTPUT(tests/scripts/100-rules.mk)
 AC_OUTPUT(tests/scripts/environment.mk)
-AC_OUTPUT(evaluation/Makefile)
 AC_OUTPUT(rose.sh)
+
+chmod +x rose.sh
 
