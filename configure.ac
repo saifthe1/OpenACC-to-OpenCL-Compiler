@@ -63,4 +63,4 @@ AC_OUTPUT(benchmark/process.sh)
 AC_OUTPUT(rose.sh)
 
 chmod +x rose.sh
-
+chmod +x benchmark/execute.sh benchmark/generate.sh benchmark/compile.sh benchmark/process.sh
