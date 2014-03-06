@@ -13,6 +13,7 @@ export OPENCL_LIB_PATH=/usr/lib
 
 export TESTS_PATH=$TOP_DIR/tests
 
+export ENV_HOST_DATA=-DKERNEL_DIR=\"`pwd`\" -DLIBOPENACC_DIR=\"@abs_top_srcdir@/libopenacc\"
 
 export CC=gcc
 export CFLAGS="-g -fno-stack-protector"
@@ -54,7 +55,7 @@ do
         then
           cd $t0-$t1-$t2
 
-          $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -c host-data.c -o host-data.o
+          $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH $ENV_HOST_DATA -c host-data.c -o host-data.o
 
           $LD $LDFLAGS ../../eval-100.o ../init.o ../kernel-libopenacc.o host-data.o -o eval
 
