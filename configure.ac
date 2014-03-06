@@ -59,6 +59,7 @@ AC_OUTPUT(tests/scripts/environment.mk)
 AC_OUTPUT(benchmark/generate.sh)
 AC_OUTPUT(benchmark/compile.sh)
 AC_OUTPUT(benchmark/execute.sh)
+AC_OUTPUT(benchmark/execute_min.sh)
 AC_OUTPUT(benchmark/process.sh)
 AC_OUTPUT(rose.sh)
 

@@ -36,6 +36,7 @@ isValidTiling() {
 }
 
 $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -I$SQLITE_INC_PATH -c eval-100.c -o eval-100.o
+$CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -I$SQLITE_INC_PATH -c eval-min.c -o eval-min.o
 
 for test in 101 102 103
 do
@@ -59,6 +60,7 @@ do
           $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH $ENV_HOST_DATA -c host-data.c -o host-data.o
 
           $LD $LDFLAGS ../../eval-100.o ../init.o ../kernel-libopenacc.o host-data.o -o eval
+          $LD $LDFLAGS ../../eval-min.o ../init.o ../kernel-libopenacc.o host-data.o -o eval-min
 
           cd ..
         fi
