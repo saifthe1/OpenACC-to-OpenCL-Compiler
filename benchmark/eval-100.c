@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
   }
 
   unsigned num_rep = atoi(argv[11]);
+  unsigned rep;
 
   acc_set_device_type(acc_device_any);
 
