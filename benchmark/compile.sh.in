@@ -1,19 +1,19 @@
 #!/bin/sh
 
-export TOP_DIR=/home/tristanvdb/projects/acc2ocl/
+export TOP_DIR=@abs_top_srcdir@
 
 export OPENACC_INC_PATH=$TOP_DIR/libopenacc/include
 export OPENACC_LIB_PATH=$TOP_DIR/libopenacc/lib
 
-export SQLITE_INC_PATH=/media/ssd/lib/sqlite/include
-export SQLITE_LIB_PATH=/media/ssd/lib/sqlite/lib
+export SQLITE_INC_PATH=@sqlite_inc_path@
+export SQLITE_LIB_PATH=@sqlite_lib_path@
 
-export OPENCL_INC_PATH=/usr/include
-export OPENCL_LIB_PATH=/usr/lib
+export OPENCL_INC_PATH=@opencl_inc_path@
+export OPENCL_LIB_PATH=@opencl_lib_path@
 
 export TESTS_PATH=$TOP_DIR/tests
 
-export ENV_HOST_DATA=-DKERNEL_DIR=\"`pwd`\" -DLIBOPENACC_DIR=\"@abs_top_srcdir@/libopenacc\"
+export ENV_HOST_DATA=-DKERNEL_DIR=\"`pwd`\" -DLIBOPENACC_DIR=\"$TOP_DIR/libopenacc\"
 
 export CC=gcc
 export CFLAGS="-g -fno-stack-protector"

@@ -1,10 +1,10 @@
 #!/bin/sh
 
-export TOP_DIR=/home/tristanvdb/projects/acc2ocl/
+export TOP_DIR=@abs_top_srcdir@
 
 export OPENACC_INC_PATH=$TOP_DIR/libopenacc/include
 
-export OPENCL_INC_PATH=/usr/include
+export OPENCL_INC_PATH=@opencl_inc_path@
 
 export TESTS_PATH=$TOP_DIR/tests
 
