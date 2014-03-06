@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   char * err_msg;
   int rc;
 
-  if (argc != 15) {
+  if (argc != 11) {
     printf("usage: %s db_file comment #gang gang[0] #worker worker[0] #vector vector[0] #sizes size[0]\n", argv[0]);
     exit(-1);
   }
@@ -98,10 +98,10 @@ int main(int argc, char **argv) {
   );
 
   long base_min_size = 1;
-  if (tiles[0] != 0) min_size *= tiles[0];
-  if (tiles[1] != 0) min_size *= tiles[1];
-  if (tiles[2] != 0) min_size *= tiles[2];
-  if (tiles[3] != 0) min_size *= tiles[3];
+  if (tiles[0] != 0) base_min_size *= tiles[0];
+  if (tiles[1] != 0) base_min_size *= tiles[1];
+  if (tiles[2] != 0) base_min_size *= tiles[2];
+  if (tiles[3] != 0) base_min_size *= tiles[3];
 
   int fake_argc = 5;
   char * fake_argv[5];
