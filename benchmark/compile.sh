@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export TOP_DIR=/media/ssd/projects/currents/openacc-to-opencl-compiler
+export TOP_DIR=/home/tristanvdb/projects/acc2ocl/
 
 export OPENACC_INC_PATH=$TOP_DIR/libopenacc/include
 export OPENACC_LIB_PATH=$TOP_DIR/libopenacc/lib
@@ -54,8 +54,10 @@ do
         then
           cd $t0-$t1-$t2
 
+          echo "$CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -c host-data.c -o host-data.o"
           $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -c host-data.c -o host-data.o
 
+          echo "$LD $LDFLAGS ../../eval-100.o ../init.o ../kernel-libopenacc.o host-data.o -o eval"
           $LD $LDFLAGS ../../eval-100.o ../init.o ../kernel-libopenacc.o host-data.o -o eval
 
           cd ..

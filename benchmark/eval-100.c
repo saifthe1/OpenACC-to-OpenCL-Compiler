@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   char * err_msg;
   int rc;
 
-  if (argc != 11) {
+  if (argc != 15) {
     printf("usage: %s db_file comment #gang gang[0] #worker worker[0] #vector vector[0] #sizes size[0]\n", argv[0]);
     exit(-1);
   }
@@ -97,6 +97,12 @@ int main(int argc, char **argv) {
     tiles[0], tiles[1], tiles[2], tiles[3], argv[2]
   );
 
+  long base_min_size = 1;
+  if (tiles[0] != 0) min_size *= tiles[0];
+  if (tiles[1] != 0) min_size *= tiles[1];
+  if (tiles[2] != 0) min_size *= tiles[2];
+  if (tiles[3] != 0) min_size *= tiles[3];
+
   int fake_argc = 5;
   char * fake_argv[5];
   fake_argv[4] = malloc(20 * sizeof(char));
@@ -104,11 +110,7 @@ int main(int argc, char **argv) {
     for (g = 0; g < gang_config_num; g++) {
       for (w = 0; w < worker_config_num; w++) {
         for (v = 0; v < vector_config_num; v++) {
-          long min_size = gang_configs[g] * worker_configs[w] * vector_configs[v];
-          if (tiles[0] != 0) min_size *= tiles[0];
-          if (tiles[1] != 0) min_size *= tiles[1];
-          if (tiles[2] != 0) min_size *= tiles[2];
-          if (tiles[3] != 0) min_size *= tiles[3];
+          long min_size = base_min_size * gang_configs[g] * worker_configs[w] * vector_configs[v];
           if (size_configs[s] >= min_size) {
             sprintf(fake_argv[4], "%lu", size_configs[s]);
 

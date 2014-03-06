@@ -1,4 +1,4 @@
-param(n, unsigned)
+param(n, int)
 scalar(offset, float)
 data(a, float, section(1, 0, n), acc(copy))
 region(
