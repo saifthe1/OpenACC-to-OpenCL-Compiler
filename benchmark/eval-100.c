@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
   char * err_msg;
   int rc;
 
-  if (argc != 11) {
-    printf("usage: %s db_file comment #gang gang[0] #worker worker[0] #vector vector[0] #sizes size[0]\n", argv[0]);
+  if (argc != 12) {
+    printf("usage: %s db_file comment #gang gang[0] #worker worker[0] #vector vector[0] #sizes size[0] num_repetition\n", argv[0]);
     exit(-1);
   }
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   for (v = 1; v < vector_config_num; v++)
     vector_configs[v] = vector_configs[v - 1] * 2;
 
-  unsigned size_config_num = atoi(argv[9]);;
+  unsigned size_config_num = atoi(argv[9]);
   unsigned long * size_configs = malloc(size_config_num * sizeof(unsigned long));
   size_configs[0] = atoi(argv[10]);
   for (s = 1; s < size_config_num; s++)
@@ -72,6 +72,8 @@ int main(int argc, char **argv) {
     sqlite3_close(db);
     return(1);
   }
+
+  unsigned num_rep = atoi(argv[11]);
 
   acc_set_device_type(acc_device_any);
 
@@ -112,32 +114,34 @@ int main(int argc, char **argv) {
         for (v = 0; v < vector_config_num; v++) {
           long min_size = base_min_size * gang_configs[g] * worker_configs[w] * vector_configs[v];
           if (size_configs[s] >= min_size) {
-            sprintf(fake_argv[4], "%lu", size_configs[s]);
+            for (rep = 0; rep < num_rep; rep++) {
+              sprintf(fake_argv[4], "%lu", size_configs[s]);
 
-            acc_timer_t data_timer = acc_timer_build();
-            acc_timer_t comp_timer = acc_timer_build();
+              acc_timer_t data_timer = acc_timer_build();
+              acc_timer_t comp_timer = acc_timer_build();
 
-            launch(fake_argc, fake_argv, gang_configs[g], worker_configs[w], vector_configs[v], data_timer, comp_timer);
+              launch(fake_argc, fake_argv, gang_configs[g], worker_configs[w], vector_configs[v], data_timer, comp_timer);
 
-            printf(
-              "size=%lu, gang=%u, worker=%u, vector=%u, t0=%u, t1=%u, t2=%u, t3=%u, comp=%lu, data=%lu\n",
-              size_configs[s], gang_configs[g], worker_configs[w], vector_configs[v],
-              tiles[0], tiles[1], tiles[2], tiles[3],
-              comp_timer->delta, data_timer->delta
-            );
+              printf(
+                "size=%lu, gang=%u, worker=%u, vector=%u, t0=%u, t1=%u, t2=%u, t3=%u, comp=%lu, data=%lu\n",
+                size_configs[s], gang_configs[g], worker_configs[w], vector_configs[v],
+                tiles[0], tiles[1], tiles[2], tiles[3],
+                comp_timer->delta, data_timer->delta
+              );
 
-            sprintf(
-              sql_cmd,
-              "insert into runs values(%u, %lu, %u, %u, %u, %lu, %lu, DATETIME());",
-              experiment_id,
-              size_configs[s], gang_configs[g], worker_configs[w], vector_configs[v],
-              comp_timer->delta, data_timer->delta
-            );
+              sprintf(
+                sql_cmd,
+                "insert into runs values(%u, %lu, %u, %u, %u, %lu, %lu, DATETIME());",
+                experiment_id,
+                size_configs[s], gang_configs[g], worker_configs[w], vector_configs[v],
+                comp_timer->delta, data_timer->delta
+              );
 
-            if (sqlite3_exec(db, sql_cmd, callback, 0, &err_msg) != SQLITE_OK) {
-              fprintf(stderr, "SQL query: %s\n", sql_cmd);
-              fprintf(stderr, "SQL error: %s\n", err_msg);
-              sqlite3_free(err_msg);
+              if (sqlite3_exec(db, sql_cmd, callback, 0, &err_msg) != SQLITE_OK) {
+                fprintf(stderr, "SQL query: %s\n", sql_cmd);
+                fprintf(stderr, "SQL error: %s\n", err_msg);
+                sqlite3_free(err_msg);
+              }
             }
           }
         }
