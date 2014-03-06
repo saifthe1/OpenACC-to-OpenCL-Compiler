@@ -16,6 +16,7 @@ rose.sh
 *.a
 
 tests/001/Makefile
+tests/002/Makefile
 tests/101/Makefile
 tests/102/Makefile
 tests/103/Makefile
