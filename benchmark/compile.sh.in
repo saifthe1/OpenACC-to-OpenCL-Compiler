@@ -35,8 +35,8 @@ isValidTiling() {
   fi
 }
 
-$CC $CFLAGS -L$SQLITE_LIB_PATH -lsqlite3 -c db-tools/init_db.c -o db-tools/init_db
-$CC $CFLAGS -L$SQLITE_LIB_PATH -lsqlite3 -c db-tools/init_min_db.c -o db-tools/init_min_db
+$CC $CFLAGS -L$SQLITE_LIB_PATH -lsqlite3 db-tools/init_db.c -o db-tools/init_db
+$CC $CFLAGS -L$SQLITE_LIB_PATH -lsqlite3 db-tools/init_min_db.c -o db-tools/init_min_db
 
 $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -I$SQLITE_INC_PATH -c eval-100.c -o eval-100.o
 $CC $CFLAGS -I$OPENACC_INC_PATH -I$OPENCL_INC_PATH -I$SQLITE_INC_PATH -c eval-min.c -o eval-min.o
