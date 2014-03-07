@@ -77,7 +77,13 @@ int main(int argc, char **argv) {
     sprintf(
       sql_cmd,
       "insert into runs values(%lu, %u, %u, %u, %u, %u, %u, %u, %lu, %lu, DATETIME());",
-      size, gang, worker, vector, tiles[0], tiles[1], tiles[2], tiles[3]
+      size, gang, worker, vector, tiles[0], tiles[1], tiles[2], tiles[3],
+      comp_timer->delta, data_timer->delta
+    );
+
+    printf(
+      "size=%lu, gang=%u, worker=%u, vector=%u, t0=%u, t1=%u, t2=%u, t3=%u, comp=%lu, data=%lu\n",
+      size, gang, worker, vector, tiles[0], tiles[1], tiles[2], tiles[3],
       comp_timer->delta, data_timer->delta
     );
 
