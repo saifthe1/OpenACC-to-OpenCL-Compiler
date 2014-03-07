@@ -25,24 +25,24 @@ isValidTiling() {
   fi
 }
 
-for test in 101 102 103
+for test in 102
 do
   rm -rf $test
   mkdir -p $test
 
   cd $test
-  for t0 in 0 1 16 32 64 128 256
+  for t0 in 0 1 32 64 128
   do
-    for t1 in 0 1 16 32 64 128 256
+    for t1 in 0 1 32 64 128
     do
-      for t2 in 0 1 16 32 64 128 256
+      for t2 in 0 1 32 64 128
       do
         if isValidTiling $t0 $t1 $t2
         then
           mkdir -p $t0-$t1-$t2
           cd $t0-$t1-$t2
 
-          $COMPILER $TOP_DIR/tests/101/klt.lt $TOP_DIR/libopenacc/include/ /usr/include/ $t0 $t1 $t2
+          $COMPILER $TOP_DIR/tests/$test/klt.lt $TOP_DIR/libopenacc/include/ /usr/include/ $t0 $t1 $t2
 
           echo >> host-data.c
           echo "unsigned tiles[4] = {$t0, $t1, $t2, 1};" >> host-data.c
