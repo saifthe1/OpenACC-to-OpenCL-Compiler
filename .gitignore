@@ -28,5 +28,7 @@ tests/scripts/environment.mk
 benchmark/generate.sh
 benchmark/compile.sh
 benchmark/execute.sh
+benchmark/execute_min.sh
 benchmark/process.sh
+benchmark/config.rc
 

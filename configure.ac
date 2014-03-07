@@ -61,6 +61,7 @@ AC_OUTPUT(benchmark/compile.sh)
 AC_OUTPUT(benchmark/execute.sh)
 AC_OUTPUT(benchmark/execute_min.sh)
 AC_OUTPUT(benchmark/process.sh)
+AC_OUTPUT(benchmark/config.rc)
 AC_OUTPUT(rose.sh)
 
 chmod +x rose.sh
