@@ -58,13 +58,15 @@ AC_OUTPUT(tests/scripts/100-rules.mk)
 AC_OUTPUT(tests/scripts/environment.mk)
 AC_OUTPUT(rose.sh)
 
-if [ -e benchmark ]
+chmod +x rose.sh
+
+if test -d benchmark
 then
 AC_OUTPUT(benchmark/generate.sh)
 AC_OUTPUT(benchmark/compile.sh)
 AC_OUTPUT(benchmark/execute.sh)
 AC_OUTPUT(benchmark/config.rc)
+
+chmod +x benchmark/execute.sh benchmark/generate.sh benchmark/compile.sh
 fi
 
-chmod +x rose.sh
-chmod +x benchmark/execute_min.sh benchmark/execute.sh benchmark/generate.sh benchmark/compile.sh benchmark/process.sh
