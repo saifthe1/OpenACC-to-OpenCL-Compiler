@@ -4,3 +4,6 @@
 [submodule "docs/doxygen-html"]
 	path = docs/doxygen-html
 	url = git@github.com:tristanvdb/acc2ocl-doxy.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/tristanvdb/acc2ocl-benchmark.git
