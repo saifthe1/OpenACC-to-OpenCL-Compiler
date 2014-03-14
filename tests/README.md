@@ -18,26 +18,26 @@ List:
 One kernel in one region.
 
 List:
- * 101-vector-constant-addition     : Adds constant value to each elements of an array, ~ **n** ops
- * 102-vector-constant-product      : Multiplies each elements of an array by a constant, ~ **n** ops
- * 103-vector-vector-addition       : Computes the sum of two vectors, ~ **n** ops
- * 104-saxpi                        : TODO y[i] = alpha\*x[i] + y[i], ~ **n** ops
- * 105-vector-vector-multiplication : TODO Computes the product of the elements of two vectors, ~ **n** ops
- * 106-matrix-matrix-addition       : TODO Computes the sum of two matrices, ~ **n.m** ops
- * 105-vector-vector-product        : TODO Computes the scalar product of two vectors, ~ **n + log(n)** ops
- * 106-matrix-vector-product        : TODO Computes the product of a matrix _n,m_ by a vector _m_, ~ **n.m + n.log(m)** ops
- * 107-vector-matrix-product        : TODO Computes the product of a vector _n_ by a matrix _n,m_, ~ **m.n + m.log(n)** ops
- * 109-matrix-matrix-product        : TODO Computes the product of two matrices _n,p_ and _p,m_, ~ **n.m.p + n.m.log(p)** ops
+ * 101: vector-constant-addition     : Adds constant value to each elements of an array, ~ **n** ops
+ * 102: vector-constant-product      : Multiplies each elements of an array by a constant, ~ **n** ops
+ * 103: vector-vector-addition       : Computes the sum of two vectors, ~ **n** ops
+ * 104: saxpi                        : TODO y[i] = alpha\*x[i] + y[i], ~ **n** ops
+ * 105: vector-vector-multiplication : TODO Computes the product of the elements of two vectors, ~ **n** ops
+ * 106: matrix-matrix-addition       : TODO Computes the sum of two matrices, ~ **n.m** ops
+ * 105: vector-vector-product        : TODO Computes the scalar product of two vectors, ~ **n + log(n)** ops
+ * 106: matrix-vector-product        : TODO Computes the product of a matrix _n,m_ by a vector _m_, ~ **n.m + n.log(m)** ops
+ * 107: vector-matrix-product        : TODO Computes the product of a vector _n_ by a matrix _n,m_, ~ **m.n + m.log(n)** ops
+ * 109: matrix-matrix-product        : TODO Computes the product of two matrices _n,p_ and _p,m_, ~ **n.m.p + n.m.log(p)** ops
 
 Content:
  * Makefile
- * 1xx-init.c       : Functions to initialize and launch the kernel
- * 1xx-openacc.c    : OpenACC version of the kernel
- * 1xx-klt.lt       : Description of the kernel in KLT language
- * 1xx-libopenacc.c : **Hand-written** Transformated OpenACC kernel
- * 1xx-host-data.c  : **Hand-written** Generated regions and kernels descriptor
- * 1xx-kernels.cl   : **Hand-written** Generated OpenCL C kernels
- * 1xx-test-vars.rc : Configuration for the 
+ * init.c       : Functions to initialize and launch the kernel
+ * openacc.c    : OpenACC version of the kernel
+ * klt.lt       : Description of the kernel in KLT language
+ * libopenacc.c : **Hand-written** Transformated OpenACC kernel
+ * host-data.c  : **Hand-written** Generated regions and kernels descriptor
+ * kernels.cl   : **Hand-written** Generated OpenCL C kernels
+ * test-vars.rc : Configuration for the 
 
 Related files:
  * 100-main.c       : Generic _main_
