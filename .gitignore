@@ -16,11 +16,29 @@ rose.sh
 *.a
 
 tests/001/Makefile
+
 tests/002/Makefile
+tests/002/dev-list
+
 tests/101/Makefile
+tests/101/libopenacc
+tests/101/reference
+
 tests/102/Makefile
+tests/102/libopenacc
+tests/102/reference
+
 tests/103/Makefile
+tests/103/libopenacc
+tests/103/reference
+
+tests/109/Makefile
+tests/109/libopenacc
+tests/109/reference
+
 tests/501/Makefile
+tests/501/libopenacc
+tests/501/reference
 
 tests/scripts/100-rules.mk
 tests/scripts/environment.mk

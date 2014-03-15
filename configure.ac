@@ -50,9 +50,11 @@ fi
 
 AC_OUTPUT(libopenacc/lib/Makefile)
 AC_OUTPUT(tests/001/Makefile)
+AC_OUTPUT(tests/002/Makefile)
 AC_OUTPUT(tests/101/Makefile)
 AC_OUTPUT(tests/102/Makefile)
 AC_OUTPUT(tests/103/Makefile)
+AC_OUTPUT(tests/109/Makefile)
 AC_OUTPUT(tests/501/Makefile)
 AC_OUTPUT(tests/scripts/100-rules.mk)
 AC_OUTPUT(tests/scripts/environment.mk)

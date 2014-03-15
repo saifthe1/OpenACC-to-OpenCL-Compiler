@@ -1,0 +1,13 @@
+
+TEST_ID=109
+
+NBR_GANG=8
+NBR_WORKER=64
+NBR_VECTOR=1
+
+TEST_PARAMS=1024 1024 1024
+
+TOP_DIR=@top_srcdir@
+
+include ../scripts/100-rules.mk
+

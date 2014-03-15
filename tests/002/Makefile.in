@@ -1,0 +1,12 @@
+
+all: dev-list
+
+dev-list: dev-list.c
+	gcc \
+          -I@top_srcdir@/libopenacc/include \
+          -DLIBOPENACC_DIR=\"@top_srcdir@/libopenacc/lib\" \
+          -DKERNEL_DIR=\"@srcdir@\" \
+          -L@top_srcdir@/libopenacc/lib -lopenacc \
+          -L@opencl_lib_path@ -lOpenCL \
+          -lrt dev-list.c -o dev-list
+	

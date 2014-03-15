@@ -1,0 +1,20 @@
+param(n, int)
+param(m, int)
+param(p, int)
+data(a, float, section(2, 0, n, 0, p), acc(copyin))
+data(b, float, section(2, 0, p, 0, m), acc(copyin))
+data(c, float, section(2, 0, n, 0, m), acc(copyout))
+region(
+  acc(),
+  loop(
+    i, 0, n, acc(gang),
+    loop(
+      j, 0, m, acc(worker),
+      stmt(c[i][j] = 0;),
+      loop(
+        k, 0, p, acc(),
+        stmt(c[i][j] += a[i][k] * b[k][j];)
+      )
+    )
+  )
+)

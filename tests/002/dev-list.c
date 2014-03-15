@@ -18,9 +18,9 @@
 #include "OpenACC/internal/compiler.h"
 
 acc_compiler_data_t compiler_data = {
-  (const char * ) "/home/tristanvdb/projects/acc2ocl/libopenacc", /* Absolute directory for OpenACC runtime (needed to compile OpenCL C codes) */
-  (const char * ) "lib/opencl/libopenacc.cl",  /* Name of the OpenCL C runtime file */
-  (const char * ) "/home/tristanvdb/projects/acc2ocl/tests/002", /* Absolute directory where the OpenCL C kernels have been stored. */
+  (const char * ) LIBOPENACC_DIR, /* Absolute directory for OpenACC runtime (needed to compile OpenCL C codes) */
+  (const char * ) "opencl/libopenacc.cl",  /* Name of the OpenCL C runtime file */
+  (const char * ) KERNEL_DIR, /* Absolute directory where the OpenCL C kernels have been stored. */
   0, NULL
 };
 
