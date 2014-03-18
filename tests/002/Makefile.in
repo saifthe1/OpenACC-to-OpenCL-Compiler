@@ -4,6 +4,7 @@ all: dev-list
 dev-list: dev-list.c
 	gcc \
           -I@top_srcdir@/libopenacc/include \
+	  -I@opencl_inc_path@ \
           -DLIBOPENACC_DIR=\"@top_srcdir@/libopenacc/lib\" \
           -DKERNEL_DIR=\"@srcdir@\" \
           -L@top_srcdir@/libopenacc/lib -lopenacc \
