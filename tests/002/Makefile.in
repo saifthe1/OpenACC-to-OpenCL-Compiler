@@ -10,4 +10,7 @@ dev-list: dev-list.c
           -L@top_srcdir@/libopenacc/lib -lopenacc \
           -L@opencl_lib_path@ -lOpenCL \
           -lrt dev-list.c -o dev-list
-	
+
+clean:
+	rm -f dev-list
+

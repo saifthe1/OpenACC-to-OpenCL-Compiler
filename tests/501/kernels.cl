@@ -71,8 +71,8 @@ __kernel void kernel_101_gang_worker_tile_0(float offset, __global float * a, __
   long it_loop_0_tile_0;
 
   // Loop for tile #0
-  for (it_loop_0_tile_0  = 0;
-       it_loop_0_tile_0  < ctx->loops[0].tiles[e_tile_0].length;
+  for (it_loop_0_tile_0  = ctx->loops[0].original.lower;
+       it_loop_0_tile_0  < ctx->loops[0].original.upper;
        it_loop_0_tile_0 += ctx->loops[0].tiles[e_tile_0].stride
   ) {
     // Gang "loop"
@@ -93,7 +93,7 @@ __kernel void kernel_101_gang_worker_tile_1(float offset, __global float * a, __
   long it_loop_0_tile_1;
 
   // Gang "loop"
-  long it_loop_0_gang = acc_gang_iteration(ctx, 0, 0);
+  long it_loop_0_gang = acc_gang_iteration(ctx, 0, ctx->loops[0].original.lower);
 
   // Loop for tile #1
   for (it_loop_0_tile_1  = it_loop_0_gang;
@@ -117,7 +117,7 @@ __kernel void kernel_101_gang_worker_tile_1(float offset, __global float * a, __
 __kernel void kernel_101_gang_worker_tile_2(float offset, __global float * a, __constant struct acc_context_t_ * ctx) {
   long it_loop_0_tile_2;
 
-  long it_loop_0_gang = acc_gang_iteration(ctx, 0, 0);
+  long it_loop_0_gang = acc_gang_iteration(ctx, 0, ctx->loops[0].original.lower);
 
   long it_loop_0_worker = acc_worker_iteration(ctx, 0, it_loop_0_gang);
 

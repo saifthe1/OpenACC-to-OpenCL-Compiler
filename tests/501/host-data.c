@@ -79,7 +79,7 @@ const acc_kernel_version_t kernel_0x00_versions[1] = {
 
 const size_t kernel_0x00_scalar_sizes[1] = { sizeof(float) };
 
-unsigned portions[2] = {3,2};
+unsigned long portions[2] = {9,7};
 
 const struct acc_loop_splitter_t_ kernel_0x00_splitted_loop = { 0, e_contiguous, 2, portions, 0 };
 
@@ -105,7 +105,7 @@ const struct acc_data_distribution_t_ region_0x00_data_dist = { e_contiguous, 2,
 
 const struct acc_region_desc_t_ region_0x00_desc = {
   0,
-  "501-kernels.cl",
+  "kernels.cl",
   0, NULL,
   1, region_0x00_kernels,
   2, dev_list,
