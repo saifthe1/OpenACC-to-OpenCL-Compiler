@@ -43,7 +43,7 @@ struct acc_region_desc_t_ region_desc_0 = {
   0, NULL,
   1, kernels_0,
   2, dev_list,
-  1, region_0x00_data_dist
+  2, region_0x00_data_dist
 };
 
 

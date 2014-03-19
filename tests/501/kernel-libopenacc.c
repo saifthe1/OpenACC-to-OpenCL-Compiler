@@ -37,7 +37,8 @@ void kernel_501(
     region_0->devices[1].num_worker = num_worker_1;
     region_0->devices[1].vector_length = vector_length_1;
 
-    region_0->distributed_data[0] = a;
+    region_0->distributed_data[0].ptr = a;
+    region_0->distributed_data[0].size = n;
 
   acc_present_or_copyin_regions_(region_0, a, n * sizeof(float));
 
@@ -53,6 +54,7 @@ void kernel_501(
 
     // Set data arguments
     kernel_0->data_ptrs[0] = a;
+    kernel_0->data_size[0] = n * sizeof(float);
 
     // Configure the loop
     kernel_0->loops[0]->lower = 0;
