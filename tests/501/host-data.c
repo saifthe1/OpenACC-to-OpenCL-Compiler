@@ -79,7 +79,7 @@ const acc_kernel_version_t kernel_0x00_versions[1] = {
 
 const size_t kernel_0x00_scalar_sizes[1] = { sizeof(float) };
 
-unsigned long portions[2] = {9,7};
+unsigned portions[2] = {9,7};
 
 const struct acc_loop_splitter_t_ kernel_0x00_splitted_loop = { 0, e_contiguous, 2, portions, 0 };
 
@@ -101,7 +101,7 @@ const struct {
   size_t num;
 } dev_list[2] = { {acc_device_nvidia, 0}, {acc_device_xeonphi, 0} };
 
-const struct acc_data_distribution_t_ region_0x00_data_dist = { e_contiguous, 2, portions, 0 };
+const struct acc_data_distribution_t_ region_0x00_data_dist [1] = { { e_contiguous, 2, portions, 0 } };
 
 const struct acc_region_desc_t_ region_0x00_desc = {
   0,
@@ -109,7 +109,7 @@ const struct acc_region_desc_t_ region_0x00_desc = {
   0, NULL,
   1, region_0x00_kernels,
   2, dev_list,
-  1, &region_0x00_data_dist
+  1, region_0x00_data_dist
 };
 
 const acc_region_desc_t regions[1] = { &region_0x00_desc };

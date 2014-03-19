@@ -37,7 +37,7 @@ void kernel_101(
       region_0->devices[1].num_worker = 128;
       region_0->devices[1].vector_length = 1;
 
-      region_0->distributed_datas[0] = a;
+      region_0->distributed_data[0] = a;
 
     acc_present_or_copyin_regions_(region_0, a, n * sizeof(float));
 
