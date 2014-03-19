@@ -14,20 +14,19 @@
 typedef struct acc_kernel_t_ * acc_kernel_t;
 typedef struct acc_region_t_ * acc_region_t;
 
-extern struct acc_kernel_desc_t_ kernel_0x00_desc;
-extern struct acc_region_desc_t_ region_0x00_desc;
+extern struct acc_kernel_desc_t_ kernel_desc_0_0;
+extern struct acc_region_desc_t_ region_desc_0;
 
-void kernel_501(
-  unsigned long n, float * a, float offset,
+void kernel_509(
+  int n, int m, int p,
+  float ** a, float ** b, float ** c,
   unsigned long num_gang_0, unsigned long num_worker_0, unsigned long vector_length_0,
   unsigned long num_gang_1, unsigned long num_worker_1, unsigned long vector_length_1,
   acc_timer_t data_timer, acc_timer_t comp_timer
 ) {
-  unsigned i;
-
   acc_timer_start(data_timer);
-
-  acc_region_t region_0 = acc_build_region(&region_0x00_desc);
+ 
+  acc_region_t region_0 = acc_build_region(&region_desc_0);
 
     region_0->devices[0].num_gang = num_gang_0;
     region_0->devices[0].num_worker = num_worker_0;
@@ -39,25 +38,39 @@ void kernel_501(
 
     region_0->distributed_data[0] = a;
 
-  acc_present_or_copyin_regions_(region_0, a, n * sizeof(float));
+  acc_present_or_copyin_regions_(region_0, a[0], n * p * sizeof(float));
+  acc_present_or_copyin_regions_(region_0, b[0], p * m * sizeof(float));
+  acc_present_or_create_regions_(region_0, c[0], n * m * sizeof(float));
 
   acc_timer_start(comp_timer);
 
   acc_region_start(region_0); // construct parallel start
 
   // Create a kernel descriptor
-  acc_kernel_t kernel_0 = acc_build_kernel(&kernel_0x00_desc);
+  acc_kernel_t kernel_0 = acc_build_kernel(&kernel_desc_0_0);
 
-    // Set scalar arguments
-    kernel_0->scalar_ptrs[0] = &offset;
+    // Set parameter arguments
+    kernel_0->param_ptrs[0] = &n;
+    kernel_0->param_ptrs[1] = &m;
+    kernel_0->param_ptrs[2] = &p;
 
     // Set data arguments
-    kernel_0->data_ptrs[0] = a;
+    kernel_0->data_ptrs[0] = b[0];
+    kernel_0->data_ptrs[1] = a[0];
+    kernel_0->data_ptrs[2] = c[0];
 
-    // Configure the loop
+    // Configure loops
     kernel_0->loops[0]->lower = 0;
     kernel_0->loops[0]->upper = n;
     kernel_0->loops[0]->stride = 1;
+
+    kernel_0->loops[1]->lower = 0;
+    kernel_0->loops[1]->upper = m;
+    kernel_0->loops[1]->stride = 1;
+
+    kernel_0->loops[2]->lower = 0;
+    kernel_0->loops[2]->upper = p;
+    kernel_0->loops[2]->stride = 1;
 
   // Enqueue the kernel for the current region
   acc_enqueue_kernel(region_0, kernel_0);
@@ -66,9 +79,7 @@ void kernel_501(
 
   acc_timer_stop(comp_timer);
 
-  acc_present_or_copyout_regions_(region_0, a, n * sizeof(float));
-
-  acc_pop_data_environment(); // construct data stop
+  acc_present_or_copyout_regions_(region_0, c[0], n * m *sizeof(float));
 
   acc_timer_stop(data_timer);
 }

@@ -40,7 +40,12 @@ tests/501/Makefile
 tests/501/libopenacc
 tests/501/reference
 
+tests/509/Makefile
+tests/509/libopenacc
+tests/509/reference
+
 tests/scripts/100-rules.mk
+tests/scripts/500-rules.mk
 tests/scripts/environment.mk
 
 benchmark/generate.sh

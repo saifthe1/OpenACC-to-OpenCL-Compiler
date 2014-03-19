@@ -6,6 +6,7 @@ all:
 	make -C 103 all
 	make -C 109 all
 	make -C 501 all
+	make -C 509 all
 
 check:
 	make -C 101 check
@@ -20,4 +21,5 @@ clean:
 	make -C 103 clean
 	make -C 109 clean
 	make -C 501 clean
+	make -C 509 clean
 

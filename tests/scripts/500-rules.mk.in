@@ -1,0 +1,33 @@
+
+OPENACC_DIR=$(TOP_DIR)/libopenacc
+KERNEL_DIR=$(TOP_DIR)/tests/$(TEST_ID)
+
+include ../scripts/environment.mk
+
+all: libopenacc
+
+check: libopenacc
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OPENACC_LIB_DIR) ./libopenacc $(NBR_GANG_0) $(NBR_WORKER_0) $(NBR_VECTOR_0) $(NBR_GANG_1) $(NBR_WORKER_1) $(NBR_VECTOR_1) $(TEST_PARAMS)
+	@echo
+
+clean:
+	rm -f *.o libopenacc* reference
+
+libopenacc: kernel-libopenacc.o ../500-main.o init.o host-data.o $(DEPS)
+	$(LD) $(LDFLAGS) $(LIBS) kernel-libopenacc.o ../500-main.o init.o host-data.o -o libopenacc
+
+kernel-libopenacc.o: kernel-libopenacc.c
+	$(CXX) $(CFLAGS) $(INCLUDES) -c kernel-libopenacc.c -o kernel-libopenacc.o
+
+../500-main.o: ../500-main.c
+	$(CXX) $(CFLAGS) $(INCLUDES) -c ../500-main.c -o ../500-main.o
+
+init.o: init.c
+	$(CXX) $(CFLAGS) $(INCLUDES) -c init.c -o init.o
+
+host-data.o: host-data.c $(ACC_INTERNAL_DEPS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(HOST_ENV_MACRO) -c host-data.c -o host-data.o
+
+$(OPENACC_LIB_FILE):
+	$(MAKE) -C $(OPENACC_LIB_DIR) lib$(OPENACC_LIB_NAME).so
+
