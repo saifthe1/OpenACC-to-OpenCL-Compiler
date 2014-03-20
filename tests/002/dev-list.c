@@ -27,7 +27,9 @@ acc_compiler_data_t compiler_data = {
 int main() {
   acc_init_once();
 
-  unsigned dev;
+  acc_device_t dev = acc_get_device_type();
+  printf("Current device: %s, %u\n", acc_device_name[dev], acc_get_device_num(dev));
+
   for (dev = 0; dev < acc_device_last; dev++) {
     printf("%s: %u, %u\n", acc_device_name[dev], acc_runtime.devices[dev].first, acc_runtime.devices[dev].num);
   }
