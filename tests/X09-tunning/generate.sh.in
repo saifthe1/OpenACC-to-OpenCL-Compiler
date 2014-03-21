@@ -1,0 +1,152 @@
+#!/bin/bash
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@boost_path@/lib
+
+KLT_GENERATOR=@abs_top_srcdir@/rose-build/projects/openacc-to-opencl/compiler/openacc-to-opencl
+SQLITE=@sqlite_lib_path@/../bin/sqlite3
+
+DB_FILE=X09-tunnig.db
+
+i=0
+
+rm -f $DB_FILE
+$SQLITE $DB_FILE "create table versions(\
+                     id  smallint,\
+                     loop_gang char,\
+                     loop_worker char,\
+                     loop_0_tile_0 smallint,\
+                     loop_0_tile_1 smallint,\
+                     loop_0_tile_2 smallint,\
+                     loop_1_tile_0 smallint,\
+                     loop_1_tile_1 smallint,\
+                     loop_1_tile_2 smallint\
+                  );"
+
+
+
+# Prototype command line
+# $KLT_GENERATOR $acc_version @top_srcdir@/libopenacc/lib @opencl_inc_path@ $t_0_0 $t_0_1 $t_0_2 $t_1_0 $t_1_1 $t_1_2
+
+#################################
+### Gang and Vector on loop i ###
+#################################
+
+acc_version=@abs_top_srcdir@/tests/109/gang-i-worker-i.lt
+
+# Prototype command line for gang-i-worker-i
+# $KLT_GENERATOR $acc_version @top_srcdir@/libopenacc/lib @opencl_inc_path@ $t_0_0 $t_0_1 $t_0_2 0 1 1
+
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'i', 0, 1, 1, 0, 1, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 0 1 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'i', 1, 0, 1, 0, 1, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 1 0 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'i', 1, 1, 0, 0, 1, 1);"
+cd ..
+
+###########################################
+### Gang on loop i and Vector on loop j ###
+###########################################
+
+acc_version=@abs_top_srcdir@/tests/109/gang-i-worker-j.lt
+
+# Prototype command line for gang-i-worker-j
+# $KLT_GENERATOR $acc_version @top_srcdir@/libopenacc/lib @opencl_inc_path@ $t_0_0 $t_0_1 1 1 $t_1_1 $t_1_2
+
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 1 0 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'j', 0, 1, 1, 1, 0, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 1 1 0
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'j', 0, 1, 1, 1, 1, 0);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 0 1 1 0 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'j', 1, 0, 1, 1, 0, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 0 1 1 1 0
+  $SQLITE $DB_FILE "insert into versions values($i, 'i', 'j', 1, 0, 1, 1, 1, 0);"
+cd ..
+
+###########################################
+### Gang on loop j and Vector on loop i ###
+###########################################
+
+acc_version=@abs_top_srcdir@/tests/109/gang-j-worker-i.lt
+
+# Prototype command line for gang-j-worker-i
+# $KLT_GENERATOR $acc_version @top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 $t_0_1 $t_0_2 $t_1_0 $t_1_1 1
+
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 0 1 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'i', 1, 0, 1, 0, 1, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 0 1 1 0 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'i', 1, 0, 1, 1, 0, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 1 0 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'i', 1, 1, 0, 0, 1, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 1 1 0 1 0 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'i', 1, 1, 0, 1, 0, 1);"
+cd ..
+
+#################################
+### Gang and Vector on loop j ###
+#################################
+
+acc_version=@abs_top_srcdir@/tests/109/gang-j-worker-j.lt
+
+# Prototype command line for gang-j-worker-j
+# $KLT_GENERATOR $acc_version @top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 $t_1_0 $t_1_1 $t_1_2
+
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 0 1 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'j', 0, 1, 1, 0, 1, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 1 0 1
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'j', 0, 1, 1, 1, 0, 1);"
+cd ..
+i=$(($i+1))
+mkdir version-$i
+cd version-$i
+  $KLT_GENERATOR $acc_version @abs_top_srcdir@/libopenacc/lib @opencl_inc_path@ 0 1 1 1 1 0
+  $SQLITE $DB_FILE "insert into versions values($i, 'j', 'j', 0, 1, 1, 1, 1, 0);"
+cd ..
+

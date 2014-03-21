@@ -57,12 +57,14 @@ AC_OUTPUT(tests/103/Makefile)
 AC_OUTPUT(tests/109/Makefile)
 AC_OUTPUT(tests/501/Makefile)
 AC_OUTPUT(tests/509/Makefile)
+AC_OUTPUT(tests/X09-tunning/generate.sh)
 AC_OUTPUT(tests/scripts/100-rules.mk)
 AC_OUTPUT(tests/scripts/500-rules.mk)
 AC_OUTPUT(tests/scripts/environment.mk)
 AC_OUTPUT(rose.sh)
 
 chmod +x rose.sh
+chmod +x tests/X09-tunning/generate.sh
 
 if test -d benchmark
 then
