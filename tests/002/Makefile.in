@@ -9,6 +9,7 @@ dev-list: dev-list.c
           -DKERNEL_DIR=\"@srcdir@\" \
           -L@top_srcdir@/libopenacc/lib -lopenacc \
           -L@opencl_lib_path@ -lOpenCL \
+          -L@sqlite_lib_path@ -lsqlite3 \
           -lrt dev-list.c -o dev-list
 
 clean:
