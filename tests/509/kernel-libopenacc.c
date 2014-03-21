@@ -26,6 +26,8 @@ void kernel_509(
 ) {
   acc_timer_start(data_timer);
  
+  acc_push_data_environment();
+
   acc_region_t region_0 = acc_build_region(&region_desc_0);
 
     region_0->devices[0].num_gang = num_gang_0;
@@ -86,6 +88,8 @@ void kernel_509(
   acc_timer_stop(comp_timer);
 
   acc_present_or_copyout_regions_(region_0, c[0], n * m *sizeof(float));
+ 
+  acc_pop_data_environment();
 
   acc_timer_stop(data_timer);
 }

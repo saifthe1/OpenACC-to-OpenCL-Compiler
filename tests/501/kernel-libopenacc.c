@@ -27,6 +27,8 @@ void kernel_501(
 
   acc_timer_start(data_timer);
 
+  acc_push_data_environment();
+
   acc_region_t region_0 = acc_build_region(&region_0x00_desc);
 
     region_0->devices[0].num_gang = num_gang_0;
