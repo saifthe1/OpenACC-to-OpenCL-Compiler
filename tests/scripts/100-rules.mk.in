@@ -13,7 +13,7 @@ check: libopenacc libopenacc reference
 	@echo
 
 clean:
-	rm -f *.o libopenacc* reference
+	rm -f *.o libopenacc* reference *.sl3 *.db
 
 libopenacc: libopenacc.o host-data.o $(DEPS)
 	$(LD) $(LDFLAGS) $(LIBS) libopenacc.o $(LIBS) host-data.o -o libopenacc

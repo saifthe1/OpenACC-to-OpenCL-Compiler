@@ -29,10 +29,6 @@ void kernel_109(
 
   acc_push_data_environment();  // construct data start
 
-  acc_copyin(a[0], n * p * sizeof(float)); // clause copyin(a[0:n][0:p])
-  acc_copyin(b[0], p * m * sizeof(float)); // clause copyin(b[0:p][0:m])
-  acc_create(c[0], n * m * sizeof(float)); // implied by clause copyout(c[0:n][0:m])
-
   { // (1)
  
     acc_region_t region_0 = acc_build_region(&region_desc_0);
@@ -89,8 +85,6 @@ void kernel_109(
     acc_present_or_copyout_regions_(region_0, c[0], n * m *sizeof(float));
 
   } // (1)
-
-  acc_copyout(c[0], n * m *sizeof(float)); // clause copyout(c[0:n][0:m])
 
   acc_pop_data_environment(); // construct data stop
 
