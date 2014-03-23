@@ -208,6 +208,8 @@ void acc_enqueue_kernel(acc_region_t region, acc_kernel_t kernel) {
     struct acc_profiling_event_data_t_ * event_data = (struct acc_profiling_event_data_t_ *)malloc(sizeof(struct acc_profiling_event_data_t_));
       event_data->kind = e_acc_kernel_launch;
       event_data->device_idx = device_idx;
+      event_data->data.kernel_launch.region_id = region->desc->id;
+      event_data->data.kernel_launch.kernel_id = kernel->desc->id;
       /// \todo fill extra data
     status = clSetEventCallback(event, CL_COMPLETE, &acc_profiling_ocl_event_callback, event_data);
     if (status != CL_SUCCESS) {

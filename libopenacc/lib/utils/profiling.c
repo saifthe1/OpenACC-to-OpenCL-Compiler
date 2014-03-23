@@ -16,7 +16,7 @@
 #undef ENABLE_LOGGING
 
 sqlite3 *profiling_db_file;
-char *profiling_event_table_name;
+long long acc_profiling_time_index;
 
 int
 acc_profiling_database_callback (void *NotUsed, int argc, char **argv, char **azColName)
@@ -50,56 +50,37 @@ acc_profiling_init ()
 
   //Step1: Give a name to profiling_db_file and using it to create a database file
   char db_file_name[128];
-  static char event_table_name[128];
   char hostname[64];
   char username[64];
-
-  char year[5];
-  char month[3];
-  char day[3];
-  char hour[3];
-  char minute[3];
-  char second[3];
 
   time_t rawtime;
   struct tm *info;
   time (&rawtime);
   info = localtime (&rawtime);
 
-  char randnum_str[5];
   srand (time (NULL));
   int randnum = rand () % 9999;
-  sprintf (randnum_str, "%04d", randnum);
 
   gethostname (hostname, 64);
   getlogin_r (username, 64);
 
-  sprintf (year, "%4d", info->tm_year + 1900);
-  sprintf (month, "%02d", info->tm_mon + 1);
-  sprintf (day, "%02d", info->tm_mday);
-  sprintf (hour, "%02d", info->tm_hour);
-  sprintf (minute, "%02d", info->tm_min);
-  sprintf (second, "%02d", info->tm_sec);
-  
+  acc_profiling_time_index = 
+      	(info->tm_year + 1900)*(long long)1e14 \
+   	+ (info->tm_mon + 1)*(long long)1e12 \ 
+   	+ info->tm_mday*(long long)1e10 \ 
+   	+ info->tm_hour*(long long)1e8 \ 
+   	+ info->tm_min*(long long)1e6 \ 
+   	+ info->tm_sec*(long long)1e4 \ 
+	+ randnum;
+  ;
+
   strcpy (db_file_name, username);
   strcat (db_file_name, "_");
   strcat (db_file_name, hostname);
   strcat (db_file_name, ".sl3");
 
-  strcpy (event_table_name, "Event");	//5
-  strcat (event_table_name, year);	//4
-  strcat (event_table_name, month);	//2
-  strcat (event_table_name, day);	//2
-  strcat (event_table_name, hour);	//2
-  strcat (event_table_name, minute);	//2
-  strcat (event_table_name, second);	//2
-  strcat (event_table_name, randnum_str);	//4
-  event_table_name[23] = '\0';
-
-  profiling_event_table_name = &event_table_name[0];
-
   printf ("profiling_db_file: %s\n", db_file_name);
-  printf ("profiling_event_table_name:_%s_\n", profiling_event_table_name);
+  printf ("acc_profiling_time_index = %lld\n",acc_profiling_time_index);
 
   bool newly_created_db_file = true;
   FILE *file;
@@ -111,7 +92,7 @@ acc_profiling_init ()
   DbErr = sqlite3_open (db_file_name, &profiling_db_file);
   assert (DbErr == SQLITE_OK);
 
-  //Step2: Create Platform, Device tables if database file is newly created
+  //Create Platform, Device, Experiment tables if database file is newly created
   if (newly_created_db_file)
     {
       sprintf (Dbstr, "CREATE TABLE Platform(  \
@@ -162,25 +143,31 @@ acc_profiling_init ()
 	sqlite3_exec (profiling_db_file, Dbstr, acc_profiling_database_callback, 0, &DbErrMsg);
       assert (DbErr == SQLITE_OK);
 
-      //Step3: fill out Platform and Device tables
+      //Fill out Platform and Device tables
       acc_profiling_platform_init ();
-    }				//r \todo [profiling] init_profiling()
 
-      //Step3: Create Event tables in the database file. 
-      sprintf (Dbstr, "CREATE TABLE '%s'(  \
-             DEVICE_ID INT, \
-             COMMAND_NAME CHAR(128), \
+      //Create Experiment table 
+      sprintf (Dbstr, "CREATE TABLE Experiment(  \
+	     TIME_INDEX			BIGINT, \
+             DEVICE_ID			INT, \
+             COMMAND_NAME 		CHAR(128), \
+	     REGION_ID 			BIGINT, \
+	     KERNEL_ID	 		BIGINT, \
+	     HOST_PRT 			BIGINT, \
+	     DEV_PTR 			BIGINT, \
+	     DATA_SIZE	 		BIGINT,\
              CL_PROFILING_COMMAND_QUEUED REAL, \
              CL_PROFILING_COMMAND_SUBMIT REAL, \
              CL_PROFILING_COMMAND_START  REAL, \
              CL_PROFILING_COMMAND_END    REAL  \
-             );", profiling_event_table_name);
+             );");
 
       DbErr =
 	sqlite3_exec (profiling_db_file, Dbstr, acc_profiling_database_callback, 0, &DbErrMsg);
       assert (DbErr == SQLITE_OK);
+    }
+}				//r \todo [profiling] init_profiling()
 
-}
 
 void
 acc_profiling_exit ()
@@ -203,61 +190,87 @@ acc_profiling_ocl_event_callback (cl_event event,
 					   sizeof (cl_ulong), &queued,
 					   NULL);
   if (status != CL_SUCCESS)
-    {
-      const char *status_str = acc_ocl_status_to_char (status);
-      printf ("[fatal]   clGetEventProfilingInfo return %s.\n", status_str);
-      exit (-1);		/// \todo error code
-    }
+    acc_profiling_ocl_error (status, __LINE__);
 
   status =
     clGetEventProfilingInfo (event, CL_PROFILING_COMMAND_SUBMIT,
 			     sizeof (cl_ulong), &submit, NULL);
   if (status != CL_SUCCESS)
-    {
-      const char *status_str = acc_ocl_status_to_char (status);
-      printf ("[fatal]   clGetEventProfilingInfo return %s.\n", status_str);
-      exit (-1);		/// \todo error code
-    }
+    acc_profiling_ocl_error (status, __LINE__);
 
   status =
     clGetEventProfilingInfo (event, CL_PROFILING_COMMAND_START,
 			     sizeof (cl_ulong), &start, NULL);
   if (status != CL_SUCCESS)
-    {
-      const char *status_str = acc_ocl_status_to_char (status);
-      printf ("[fatal]   clGetEventProfilingInfo return %s.\n", status_str);
-      exit (-1);		/// \todo error code
-    }
+    acc_profiling_ocl_error (status, __LINE__);
 
   status =
     clGetEventProfilingInfo (event, CL_PROFILING_COMMAND_END,
 			     sizeof (cl_ulong), &end, NULL);
   if (status != CL_SUCCESS)
-    {
-      const char *status_str = acc_ocl_status_to_char (status);
-      printf ("[fatal]   clGetEventProfilingInfo return %s.\n", status_str);
-      exit (-1);		/// \todo error code
-    }
+    acc_profiling_ocl_error (status, __LINE__);
+
+  long long region_id = -1;
+  long long kernel_id = -1;
+  long long host_ptr = -1;
+  long long dev_ptr = -1;
+  long long  data_size = -1;
 
   char *command_name;
   switch (event_data->kind)
     {
     case e_acc_memcpy_to_device:
-      command_name = "acc_memcpy_to_device";
-      break;
+      {
+	host_ptr = event_data->data.memcpy.host_ptr;
+	dev_ptr = event_data->data.memcpy.dev_ptr;
+	data_size = event_data->data.memcpy.size;
+      	command_name = "acc_memcpy_to_device";
+      	break;
+      }
     case e_acc_memcpy_from_device:
-      command_name = "acc_memcpy_from_device";
-      break;
+      {
+	host_ptr = event_data->data.memcpy.host_ptr;
+	dev_ptr = event_data->data.memcpy.dev_ptr;
+	data_size = event_data->data.memcpy.size;
+        command_name = "acc_memcpy_from_device";
+        break;
+      }
     case e_acc_kernel_launch:
-      command_name = "acc_kernel_launch";
-      break;
+      {
+	region_id = event_data->data.kernel_launch.region_id;
+	kernel_id = event_data->data.kernel_launch.kernel_id;
+        command_name = "acc_kernel_launch";
+        break;
+      }
     }
 
   char Dbstr[8192];
   sprintf (Dbstr,
-	   "INSERT INTO '%s' VALUES ( '%d', '%s', '%.3f', '%.3f', '%.3f', '%.3f');",
-	   profiling_event_table_name, event_data->device_idx, command_name,
-	   queued * 1.0e-3, submit * 1.0e-3, start * 1.0e-3, end * 1.0e-3);
+	   "INSERT INTO Experiment VALUES ( \
+	'%lld', \
+	'%d', \
+	'%s', \
+	'%lld', \
+	'%lld', \
+	'%lld', \
+	'%lld', \
+	'%lld', \
+	'%.3f', \
+	'%.3f', \
+	'%.3f', \
+	'%.3f');",\
+	acc_profiling_time_index,\
+	   event_data->device_idx, \
+	   command_name, \
+	   region_id, \
+	   kernel_id, \
+	   host_ptr, \
+	   dev_ptr, \
+	   data_size, \
+	   queued * 1.0e-3, \
+	   submit * 1.0e-3, \
+	   start * 1.0e-3, \
+	   end * 1.0e-3);
 
   char *DbErrMsg;
   int DbErr =

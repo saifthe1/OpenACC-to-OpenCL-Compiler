@@ -309,6 +309,9 @@ void acc_memcpy_to_device_(size_t device_idx, d_void * dest, h_void * src, size_
   struct acc_profiling_event_data_t_ * event_data = (struct acc_profiling_event_data_t_ *)malloc(sizeof(struct acc_profiling_event_data_t_));
     event_data->kind = e_acc_memcpy_to_device;
     event_data->device_idx = device_idx;
+    event_data->data.memcpy.host_ptr = src;
+    event_data->data.memcpy.dev_ptr  = dest;
+    event_data->data.memcpy.size     = bytes;
     /// \todo fill extra data
   status = clSetEventCallback(event, CL_COMPLETE, &acc_profiling_ocl_event_callback, event_data);
   if (status != CL_SUCCESS) {
@@ -341,6 +344,9 @@ void acc_memcpy_from_device_(size_t device_idx, h_void * dest, d_void * src, siz
   struct acc_profiling_event_data_t_ * event_data = (struct acc_profiling_event_data_t_ *)malloc(sizeof(struct acc_profiling_event_data_t_));
     event_data->kind = e_acc_memcpy_from_device;
     event_data->device_idx = device_idx;
+    event_data->data.memcpy.host_ptr = src;
+    event_data->data.memcpy.dev_ptr  = dest;
+    event_data->data.memcpy.size     = bytes;
     /// \todo fill extra data
   status = clSetEventCallback(event, CL_COMPLETE, &acc_profiling_ocl_event_callback, event_data);
   if (status != CL_SUCCESS) {
