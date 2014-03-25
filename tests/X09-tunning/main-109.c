@@ -1,8 +1,12 @@
-
-#include <stdio.h>
+/*!
+ * \addtogroup grp_libopenacc_tests
+ * @{
+ *
+ * \file X09-tunning/main.c
+ *
+ */
 
 #include "OpenACC/openacc.h"
-#include "OpenACC/utils/timer.h"
 
 #include "OpenACC/private/debug.h"
 #include "OpenACC/private/region.h"
@@ -10,6 +14,19 @@
 #include "OpenACC/private/loop.h"
 #include "OpenACC/private/data-env.h"
 #include "OpenACC/private/memory.h"
+#include "OpenACC/private/runtime.h"
+#include "OpenACC/private/init.h"
+
+#include "OpenACC/utils/profiling.h"
+
+#include "sqlite3.h"
+
+#include <math.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <assert.h>
 
 typedef struct acc_kernel_t_ * acc_kernel_t;
 typedef struct acc_region_t_ * acc_region_t;
@@ -20,12 +37,8 @@ extern struct acc_region_desc_t_ region_desc_0;
 void kernel_109(
   int n, int m, int p,
   float ** a, float ** b, float ** c,
-  unsigned long num_gang, unsigned long num_worker, unsigned long vector_length,
-  acc_timer_t data_timer, acc_timer_t comp_timer
+  unsigned long num_gang, unsigned long num_worker, unsigned long vector_length
 ) {
-  unsigned i;
-
-  acc_timer_start(data_timer);
 
   acc_push_data_environment();  // construct data start
 
@@ -41,8 +54,6 @@ void kernel_109(
     acc_present_or_copyin_regions_(region_0, b[0], p * m * sizeof(float));
     acc_present_or_create_regions_(region_0, c[0], n * m * sizeof(float));
 
-    acc_timer_start(comp_timer);
-
     acc_region_start(region_0); // construct parallel start
 
     { // (2)
@@ -56,8 +67,8 @@ void kernel_109(
       kernel_0->param_ptrs[2] = &p;
 
       // Set data arguments
-      kernel_0->data_ptrs[0] = b[0];
-      kernel_0->data_ptrs[1] = a[0];
+      kernel_0->data_ptrs[0] = a[0];
+      kernel_0->data_ptrs[1] = b[0];
       kernel_0->data_ptrs[2] = c[0];
 
       // Configure loops
@@ -80,26 +91,11 @@ void kernel_109(
 
     acc_region_stop(region_0); // construct parallel stop
 
-    acc_timer_stop(comp_timer);
-
     acc_present_or_copyout_regions_(region_0, c[0], n * m *sizeof(float));
 
   } // (1)
 
   acc_pop_data_environment(); // construct data stop
-
-  acc_timer_stop(data_timer);
-}
-
-void read_params(
-  int argc, char ** argv,
-  int * n, int * m, int * p
-) {
-  assert(argc == 7);
-
-  *n = atoi(argv[4]);
-  *m = atoi(argv[5]);
-  *p = atoi(argv[6]);
 }
 
 void init_data(int n, int m, int p, float *** a, float *** b, float *** c) {
@@ -146,18 +142,52 @@ void free_data(int n, int m, int p, float ** a, float ** b, float ** c) {
   free(c);
 }
 
-void launch(
-  int argc, char ** argv,
+void register_experiment(
+  char * experiment_db_file,
+  int version_id,
   unsigned long num_gang,
   unsigned long num_worker,
-  unsigned long vector_length,
-  acc_timer_t data_timer, acc_timer_t comp_timer
+  int n, int m, int p
 ) {
-  int n, m, p;
+  acc_init_once(); // need to initialize OpenACC's profiling
+
+  char * profiling_db_file_name = acc_profiling_get_db_file_name();
+  char * profiling_event_table_name = acc_profiling_get_event_table_name();
+
+  unsigned device_idx = acc_get_device_idx(acc_runtime.curr_device_type, acc_runtime.curr_device_num);
+
+  sqlite3 * experiment_db;
+  int status = sqlite3_open(experiment_db_file, &experiment_db);
+  assert(status == SQLITE_OK);
+
+  char db_query[1024];
+  sprintf(db_query, "insert into experiments values ( '%d' , '%s' , '%s' , '%d' , '%d' , '%d' , '%d' , '%d' , '%d' );",
+                    version_id, profiling_db_file_name, profiling_event_table_name, device_idx,
+                    num_gang, num_worker, n, m ,p
+         );
+
+  char * err_msg;
+  status = sqlite3_exec (experiment_db, db_query, NULL, 0, &err_msg);
+  assert(status == SQLITE_OK);
+}
+
+int main(int argc, char ** argv) {
+  assert(argc == 8);
+
+  unsigned long num_gang = atoi(argv[1]);
+  unsigned long num_worker = atoi(argv[2]);
+  unsigned long vector_length = 1;
+
+  int n = atoi(argv[3]);
+  int m = atoi(argv[4]);
+  int p = atoi(argv[5]);
+
+  char * experiment_db_file = argv[6];
+  int version_id = atoi(argv[7]);
+
+  register_experiment(experiment_db_file, version_id, num_gang, num_worker, n, m, p);
 
   int i, j;
-
-  read_params(argc, argv, &n, &m, &p);
 
   float ** a;
   float ** b;
@@ -165,11 +195,12 @@ void launch(
 
   init_data(n, m, p, &a, &b, &c);
 
-  kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length, data_timer, comp_timer);
-
-  acc_timer_delta(data_timer);
-  acc_timer_delta(comp_timer);
+  kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
 
   free_data(n, m, p, a, b, c);
+
+  return 0;
 }
+
+/*! @} */
 

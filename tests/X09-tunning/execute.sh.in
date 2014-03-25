@@ -1,0 +1,97 @@
+#!/bin/bash
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@abs_top_srcdir@/libopenacc/lib
+
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+
+SQLITE=@sqlite_lib_path@/../bin/sqlite3
+
+echo
+echo "***********************************"
+echo "* Configuration of generated code *"
+echo "***********************************"
+echo
+
+cat generation-config.log
+
+echo
+echo "*************"
+echo "* Execution *"
+echo "*************"
+echo
+
+if [ ! -w experiments.db ]
+then
+  echo "Cannot write experiments data-base."
+  exit 3
+fi
+
+$SQLITE experiments.db "create table experiments(\
+                          version_id  smallint,\
+                          profiling_db char(140),\
+                          event_table char(24),\
+                          device_id int,\
+                          gang int,\
+                          worker int,\
+                          n int,\
+                          m int,\
+                          p int\
+                        );"
+
+DEVICE_TYPE_VALUES="INTEL"
+GANG_VALUES="8 16 32 64 128 256 512"
+WORKER_VALUES="8 16 32 64 128 256 512"
+N_VALUES="1024 2048 4096 8192"
+M_VALUES="1024 2048 4096 8192"
+P_VALUES="1024 2048 4096 8192"
+
+for version in `$SQLITE experiments.db "select * from versions;"`
+do
+  version_id=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $1);}'`
+  gang_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $2);}'`
+  worker_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $3);}'`
+
+  loop_0_tile_0=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $4);}'`
+  loop_0_tile_1=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $5);}'`
+  loop_0_tile_2=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $6);}'`
+
+  loop_1_tile_0=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $7);}'`
+  loop_1_tile_1=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $8);}'`
+  loop_1_tile_2=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $9);}'`
+
+  echo "Execute version #$version_id : gang on $gang_loop, worker on $worker_loop, loop_0=($loop_0_tile_0,$loop_0_tile_1,$loop_0_tile_2), loop_1=($loop_1_tile_0,$loop_1_tile_1,$loop_1_tile_2)"
+
+  cd version-$version_id
+
+  for device_type in $DEVICE_TYPE_VALUES
+  do
+    for gang in $GANG_VALUES
+    do
+      for worker in $WORKER_VALUES
+      do
+        for n in $N_VALUES
+        do
+          for m in $M_VALUES
+          do
+            for p in $P_VALUES
+            do
+              if [ "$gang_loop" == "i" -a "$worker_loop" == "i" -a "$n" -lt "$(($gang * $worker))" ]
+              then
+                continue;
+              elif [ "$gang_loop" == "j" -a "$worker_loop" == "j" -a "$m" -lt "$(($gang * $worker))" ]
+              then
+                continue;
+              fi
+              echo "ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p ../experiments.db $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log"
+              ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p ../experiments.db $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log
+            done
+          done
+        done
+      done
+    done
+  done
+
+  cd ..
+
+done
+

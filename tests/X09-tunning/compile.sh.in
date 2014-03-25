@@ -1,0 +1,58 @@
+#!/bin/bash
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@
+
+SQLITE=@sqlite_lib_path@/../bin/sqlite3
+
+if [ ! -r $1 ]
+then
+  echo "Cannot read archive: $1"
+  exit 1
+fi
+
+tar xzf $1 || ( echo "Problem extracting files from archive." ; exit 2 )
+
+echo
+echo "***********************************"
+echo "* Configuration of generated code *"
+echo "***********************************"
+echo
+
+cat generation-config.log
+
+echo
+echo "***************"
+echo "* Compilation *"
+echo "***************"
+echo
+
+if [ ! -r experiments.db ]
+then
+  echo "Cannot read experiments data-base."
+  exit 3
+fi
+
+for version in `$SQLITE experiments.db "select * from versions;"`
+do
+  version_id=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $1);}'`
+  gang_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $2);}'`
+  worker_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $3);}'`
+
+  loop_0_tile_0=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $4);}'`
+  loop_0_tile_1=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $5);}'`
+  loop_0_tile_2=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $6);}'`
+
+  loop_1_tile_0=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $7);}'`
+  loop_1_tile_1=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $8);}'`
+  loop_1_tile_2=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $9);}'`
+
+  echo "Compile version #$version_id : gang on $gang_loop, worker on $worker_loop, loop_0=($loop_0_tile_0,$loop_0_tile_1,$loop_0_tile_2), loop_1=($loop_1_tile_0,$loop_1_tile_1,$loop_1_tile_2)"
+
+  cd version-$version_id
+
+  make -f @abs_srcdir@/X09-version.make test-109 &> compilation.log
+
+  cd ..
+
+done
+

@@ -50,7 +50,11 @@ tests/scripts/environment.mk
 
 tests/X09-tunning/generate.sh
 tests/X09-tunning/version-*
-tests/X09-tunning/X09-tunnig.db
+tests/X09-tunning/X09-version.make
+tests/X09-tunning/X09.make
+tests/X09-tunning/compile.sh
+tests/X09-tunning/execute.sh
+tests/X09-tunning/versions.tar.gz
 
 benchmark/generate.sh
 benchmark/compile.sh
@@ -58,4 +62,7 @@ benchmark/execute.sh
 benchmark/execute_min.sh
 benchmark/process.sh
 benchmark/config.rc
+
+*.db
+*.sl3
 

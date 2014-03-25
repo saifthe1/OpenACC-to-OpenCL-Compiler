@@ -1,0 +1,8 @@
+
+OPENACC_CFLAGS=-I@abs_top_srcdir@/libopenacc/include
+OPENCL_CFLAGS=-I@opencl_inc_path@
+SQLITE_CFLAGS=-I@sqlite_inc_path@
+
+main-109.o: main-109.c
+	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-109.c -o main-109.o
+

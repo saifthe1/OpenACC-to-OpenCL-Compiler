@@ -50,3 +50,4 @@ struct acc_region_desc_t_ region_desc_0 = {
 struct acc_region_desc_t_ *regions[1UL] = {&region_desc_0};
 
 struct acc_compiler_data_t_ compiler_data = {LIBOPENACC_DIR, "lib/opencl/libopenacc.cl", KERNEL_DIR, 1, regions};
+
