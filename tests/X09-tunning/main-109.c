@@ -98,6 +98,48 @@ void kernel_109(
   acc_pop_data_environment(); // construct data stop
 }
 
+void init_data(int n, int m, int p, float *** a, float *** b, float *** c);
+void free_data(int n, int m, int p, float ** a, float ** b, float ** c);
+
+int main(int argc, char ** argv) {
+
+  // Initialize OpenACC (for profiling)
+  acc_init_once();
+
+  char * experiment_desc = "version_id , gang , worker , n , m , p";
+  acc_profiling_set_experiment(experiment_desc);
+
+  assert(argc == 7);
+
+  unsigned long num_gang = atoi(argv[1]);
+  unsigned long num_worker = atoi(argv[2]);
+  unsigned long vector_length = 1;
+
+  int n = atoi(argv[3]);
+  int m = atoi(argv[4]);
+  int p = atoi(argv[5]);
+
+  int version_id = atoi(argv[6]);
+
+  char run_desc[1024];
+  sprintf(run_desc, " '%d' , '%ul' , '%ul' , '%d' , '%d' , '%d' ", version_id, num_gang, num_worker, n, m, p);
+  acc_profiling_new_run(run_desc);
+
+  int i, j;
+
+  float ** a;
+  float ** b;
+  float ** c;
+
+  init_data(n, m, p, &a, &b, &c);
+
+  kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
+
+  free_data(n, m, p, a, b, c);
+
+  return 0;
+}
+
 void init_data(int n, int m, int p, float *** a, float *** b, float *** c) {
   int i, j;
 
@@ -140,66 +182,6 @@ void free_data(int n, int m, int p, float ** a, float ** b, float ** c) {
 
   free(c[0]);
   free(c);
-}
-
-void register_experiment(
-  char * experiment_db_file,
-  int version_id,
-  unsigned long num_gang,
-  unsigned long num_worker,
-  int n, int m, int p
-) {
-  acc_init_once(); // need to initialize OpenACC's profiling
-
-  char * profiling_db_file_name = acc_profiling_get_db_file_name();
-  char * profiling_event_table_name = acc_profiling_get_event_table_name();
-
-  unsigned device_idx = acc_get_device_idx(acc_runtime.curr_device_type, acc_runtime.curr_device_num);
-
-  sqlite3 * experiment_db;
-  int status = sqlite3_open(experiment_db_file, &experiment_db);
-  assert(status == SQLITE_OK);
-
-  char db_query[1024];
-  sprintf(db_query, "insert into experiments values ( '%d' , '%s' , '%s' , '%d' , '%d' , '%d' , '%d' , '%d' , '%d' );",
-                    version_id, profiling_db_file_name, profiling_event_table_name, device_idx,
-                    num_gang, num_worker, n, m ,p
-         );
-
-  char * err_msg;
-  status = sqlite3_exec (experiment_db, db_query, NULL, 0, &err_msg);
-  assert(status == SQLITE_OK);
-}
-
-int main(int argc, char ** argv) {
-  assert(argc == 8);
-
-  unsigned long num_gang = atoi(argv[1]);
-  unsigned long num_worker = atoi(argv[2]);
-  unsigned long vector_length = 1;
-
-  int n = atoi(argv[3]);
-  int m = atoi(argv[4]);
-  int p = atoi(argv[5]);
-
-  char * experiment_db_file = argv[6];
-  int version_id = atoi(argv[7]);
-
-  register_experiment(experiment_db_file, version_id, num_gang, num_worker, n, m, p);
-
-  int i, j;
-
-  float ** a;
-  float ** b;
-  float ** c;
-
-  init_data(n, m, p, &a, &b, &c);
-
-  kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
-
-  free_data(n, m, p, a, b, c);
-
-  return 0;
 }
 
 /*! @} */

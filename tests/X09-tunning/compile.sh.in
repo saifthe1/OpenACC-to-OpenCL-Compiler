@@ -13,26 +13,18 @@ fi
 tar xzf $1 || ( echo "Problem extracting files from archive." ; exit 2 )
 
 echo
-echo "***********************************"
-echo "* Configuration of generated code *"
-echo "***********************************"
-echo
-
-cat generation-config.log
-
-echo
 echo "***************"
 echo "* Compilation *"
 echo "***************"
 echo
 
-if [ ! -r experiments.db ]
+if [ ! -r versions.db ]
 then
   echo "Cannot read experiments data-base."
   exit 3
 fi
 
-for version in `$SQLITE experiments.db "select * from versions;"`
+for version in `$SQLITE versions.db "select * from versions;"`
 do
   version_id=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $1);}'`
   gang_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $2);}'`

@@ -7,36 +7,16 @@ echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 SQLITE=@sqlite_lib_path@/../bin/sqlite3
 
 echo
-echo "***********************************"
-echo "* Configuration of generated code *"
-echo "***********************************"
-echo
-
-cat generation-config.log
-
-echo
 echo "*************"
 echo "* Execution *"
 echo "*************"
 echo
 
-if [ ! -w experiments.db ]
+if [ ! -r versions.db ]
 then
-  echo "Cannot write experiments data-base."
+  echo "Cannot read experiments data-base."
   exit 3
 fi
-
-$SQLITE experiments.db "create table experiments(\
-                          version_id  smallint,\
-                          profiling_db char(140),\
-                          event_table char(24),\
-                          device_id int,\
-                          gang int,\
-                          worker int,\
-                          n int,\
-                          m int,\
-                          p int\
-                        );"
 
 DEVICE_TYPE_VALUES="INTEL"
 GANG_VALUES="8 16 32 64 128 256 512"
@@ -45,7 +25,7 @@ N_VALUES="1024 2048 4096 8192"
 M_VALUES="1024 2048 4096 8192"
 P_VALUES="1024 2048 4096 8192"
 
-for version in `$SQLITE experiments.db "select * from versions;"`
+for version in `$SQLITE versions.db "select * from versions;"`
 do
   version_id=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%d", $1);}'`
   gang_loop=`echo "$version" | awk 'BEGIN{FS="|"}{ printf("%s", $2);}'`
@@ -82,8 +62,8 @@ do
               then
                 continue;
               fi
-              echo "ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p ../experiments.db $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log"
-              ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p ../experiments.db $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log
+              echo "ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log"
+              ACC_PROFILING_DB=../profiles.db ACC_DEVICE_TYPE=$device_type ./test-109 $gang $worker $n $m $p $version_id &> exec-$device_type-$gang-$worker-$n-$m-$p.log
             done
           done
         done
