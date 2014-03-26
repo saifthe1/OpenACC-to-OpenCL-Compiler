@@ -35,9 +35,9 @@ extern struct acc_kernel_desc_t_ kernel_desc_0_0;
 extern struct acc_region_desc_t_ region_desc_0;
 
 void kernel_109(
-  int n, int m, int p,
+  size_t n, size_t m, size_t p,
   float ** a, float ** b, float ** c,
-  unsigned long num_gang, unsigned long num_worker, unsigned long vector_length
+  size_t num_gang, size_t num_worker, size_t vector_length
 ) {
 
   acc_push_data_environment();  // construct data start
@@ -98,31 +98,32 @@ void kernel_109(
   acc_pop_data_environment(); // construct data stop
 }
 
-void init_data(int n, int m, int p, float *** a, float *** b, float *** c);
-void free_data(int n, int m, int p, float ** a, float ** b, float ** c);
+void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float *** c);
+void free_data(float ** a, float ** b, float ** c);
 
 int main(int argc, char ** argv) {
 
   // Initialize OpenACC (for profiling)
   acc_init_once();
 
-  char * experiment_desc = "version_id , gang , worker , n , m , p";
+  char * experiment_desc = " version_id INT, acc_device_type CHAR(40), gang INT, worker INT, n INT, m INT, p INT ";
   acc_profiling_set_experiment(experiment_desc);
 
   assert(argc == 7);
 
-  unsigned long num_gang = atoi(argv[1]);
-  unsigned long num_worker = atoi(argv[2]);
-  unsigned long vector_length = 1;
+  size_t num_gang = atoi(argv[1]);
+  size_t num_worker = atoi(argv[2]);
+  size_t vector_length = 1;
 
-  int n = atoi(argv[3]);
-  int m = atoi(argv[4]);
-  int p = atoi(argv[5]);
+  size_t n = atoi(argv[3]);
+  size_t m = atoi(argv[4]);
+  size_t p = atoi(argv[5]);
 
   int version_id = atoi(argv[6]);
 
   char run_desc[1024];
-  sprintf(run_desc, " '%d' , '%ul' , '%ul' , '%d' , '%d' , '%d' ", version_id, num_gang, num_worker, n, m, p);
+  sprintf(run_desc, " '%d' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
+                    version_id, acc_device_name[acc_runtime.curr_device_type], num_gang, num_worker, n, m, p);
   acc_profiling_new_run(run_desc);
 
   int i, j;
@@ -135,13 +136,15 @@ int main(int argc, char ** argv) {
 
   kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
 
-  free_data(n, m, p, a, b, c);
+  free_data(a, b, c);
+
+  acc_profiling_exit();
 
   return 0;
 }
 
-void init_data(int n, int m, int p, float *** a, float *** b, float *** c) {
-  int i, j;
+void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float *** c) {
+  size_t i, j;
 
   float * data;
   float ** tmp;
@@ -171,8 +174,7 @@ void init_data(int n, int m, int p, float *** a, float *** b, float *** c) {
   *c = tmp;
 }
 
-void free_data(int n, int m, int p, float ** a, float ** b, float ** c) {
-  int i;
+void free_data(float ** a, float ** b, float ** c) {
 
   free(a[0]);
   free(a);
