@@ -7,7 +7,7 @@ struct acc_compiler_data_t_ ;
 size_t param_sizes_0x3087c70[3] = {sizeof(int ), sizeof(int ), sizeof(int )};
 size_t scalar_sizes_0x3087c70[0] = {};
 struct acc_loop_t_ loops_0x26cdd20[3UL] = {{{0L, 0L, 1L, 1L, 1L, 1L, 1L}}, {{0L, 1L, 1L, 0L, 1L, 1L, 1L}}, {{0L, 1L, 1L, 1L, 1L, 1L, 1L}}};
-struct acc_kernel_version_t_ version_0 = {0, 0, 1, loops_0x26cdd20, "kernel_0x3087c70_0"};
+struct acc_kernel_version_t_ version_0 = {0, 0, 1, loops_0x26cdd20, "kernel_0x3087c70_0", acc_device_any};
 struct acc_kernel_version_t_ *versions[1UL] = {&version_0};
 
 unsigned portions[2] = {9,7};

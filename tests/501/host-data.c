@@ -30,7 +30,7 @@ const struct acc_loop_t_ kernel_0x00_v1_loops[1] = {
 };
 
 const struct acc_kernel_version_t_ kernel_0x00_v1 = {
-  0, 0, 1, kernel_0x00_v1_loops, "_gang_worker_tile_0"
+  0, 0, 1, kernel_0x00_v1_loops, "_gang_worker_tile_0", acc_device_any
 };
 
 ////////////////////////////////////
@@ -44,7 +44,7 @@ const struct acc_loop_t_ kernel_0x00_v2_loops[1] = {
 };
 
 const struct acc_kernel_version_t_ kernel_0x00_v2 = {
-  0, 0, 1, kernel_0x00_v2_loops, "_gang_worker_tile_1"
+  0, 0, 1, kernel_0x00_v2_loops, "_gang_worker_tile_1", acc_device_any
 };
 
 ////////////////////////////////////
@@ -58,7 +58,7 @@ const struct acc_loop_t_ kernel_0x00_v3_loops[1] = {
 };
 
 const struct acc_kernel_version_t_ kernel_0x00_v3 = {
-  0, 0, 1, kernel_0x00_v3_loops, "_gang_worker_tile_2"
+  0, 0, 1, kernel_0x00_v3_loops, "_gang_worker_tile_2", acc_device_any
 };
 
 /// Kernel descriptor
