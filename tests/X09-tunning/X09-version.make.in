@@ -16,15 +16,9 @@ HOST_DATA_CFLAGS=-DLIBOPENACC_DIR=\"$(LIBOPENACC_DIR)\" -DKERNEL_DIR=\"$(KERNEL_
 test-109: host-data.o ../main-109.o
 	$(CC) $(OPENACC_LDFLAGS) $(OPENCL_LDFLAGS) $(SQLITE_LDFLAGS) -lrt host-data.o ../main-109.o -o test-109
 
-test-509: host-data.o ../main-509.o
-	$(CC) $(OPENACC_LDFLAGS) $(OPENCL_LDFLAGS) $(SQLITE_LDFLAGS) -lrt host-data.o ../main-509.o -o test-509
-
 host-data.o: host-data.c
 	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data.c -o host-data.o
 
 ../main-109.o:
 	make -f @abs_srcdir@/X09.make -C .. main-109.o
-
-../main-509.o:
-	make -f @abs_srcdir@/X09.make -C .. main-509.o
 

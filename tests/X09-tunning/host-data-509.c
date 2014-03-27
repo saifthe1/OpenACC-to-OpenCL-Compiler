@@ -25,6 +25,9 @@ unsigned portions[2] = { GPU_PORTION , MIC_PORTION };
 
 size_t param_sizes[3] = { sizeof(int) , sizeof(int) , sizeof(int) };
 
+size_t gpu_kernel_id = GPU_KERNEL_ID;
+size_t mic_kernel_id = MIC_KERNEL_ID;
+
 struct acc_loop_t_ loops_gtx_460[3] = {
 #if GPU_KERNEL_ID == 0
   {{0L, 0L, 1L, 0L, 1L, 1L, 1L}}, {{0L, 1L, 1L, 1L, 1L, 1L, 1L}}, {{0L, 1L, 1L, 1L, 1L, 1L, 1L}}
@@ -93,7 +96,7 @@ struct acc_kernel_version_t_ version_gtx_460 = {
 #else
 #  error "Wrong value for GPU_KERNEL_ID"
 #endif
-  acc_device_gtx_460
+  acc_device_GTX_460
 };
 
 struct acc_loop_t_ loops_xeonphi[3] = {
@@ -176,7 +179,7 @@ const struct acc_loop_splitter_t_ kernel_splitted_loop = { 0, e_contiguous, 2, p
 
 struct acc_kernel_desc_t_ kernel_desc_0_0 = {
   0,
-  "kernel_",
+  "kernel",
   3, param_sizes,
   0, NULL,
   3,
@@ -190,7 +193,7 @@ struct acc_kernel_desc_t_ * kernels_0[1] = { &kernel_desc_0_0 };
 const struct {
   acc_device_t kind;
   size_t num;
-} dev_list[2] = { {acc_device_gtx_460, 0}, {acc_device_xeonphi, 0} };
+} dev_list[2] = { {acc_device_GTX_460, 0}, {acc_device_xeonphi, 0} };
 
 const struct acc_data_distribution_t_ region_0_data_dist [2] = {
   { e_contiguous, 2, portions, 0 },

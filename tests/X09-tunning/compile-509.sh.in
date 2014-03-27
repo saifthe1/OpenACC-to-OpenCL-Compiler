@@ -1,0 +1,50 @@
+#!/bin/bash
+
+export OPENACC_CFLAGS="-I@abs_top_srcdir@/libopenacc/include"
+export OPENACC_LDFLAGS="-L@abs_top_srcdir@/libopenacc/lib -lopenacc"
+
+export OPENCL_CFLAGS="-I@opencl_inc_path@"
+export OPENCL_LDFLAGS="-L@opencl_lib_path@ -lOpenCL"
+
+export SQLITE_CFLAGS="-I@sqlite_inc_path@"
+export SQLITE_LDFLAGS="-L@sqlite_lib_path@ -lsqlite3"
+
+export LIBOPENACC_DIR="@abs_top_srcdir@/libopenacc"
+export KERNEL_DIR="@abs_srcdir@"
+
+export HOST_DATA_CFLAGS="-DLIBOPENACC_DIR=\"$LIBOPENACC_DIR\" -DKERNEL_DIR=\"$KERNEL_DIR\""
+
+export PORTIONS=32
+export GPU_KERNELS="1 6"
+export MIC_KERNELS="5 9"
+
+echo "gcc $OPENACC_CFLAGS $OPENCL_CFLAGS $SQLITE_CFLAGS -c @abs_srcdir@/main-509.c -o main-509.o"> compile-509.log
+gcc $OPENACC_CFLAGS $OPENCL_CFLAGS $SQLITE_CFLAGS -c @abs_srcdir@/main-509.c -o main-509.o &>> compile-509.log
+
+for gpu_portion in `seq 1 $(($PORTIONS-1))`
+do
+  for gpu_kernel_id in $GPU_KERNELS
+  do
+    for mic_kernel_id in $MIC_KERNELS
+    do
+      export mic_portion=$(($PORTIONS-$gpu_portion))
+
+      export MULTIDEV_CFLAGS="-DGPU_PORTION=$gpu_portion -DMIC_PORTION=$mic_portion -DGPU_KERNEL_ID=$gpu_kernel_id -DMIC_KERNEL_ID=$mic_kernel_id"
+      export suffix="$gpu_portion-$mic_portion-$gpu_kernel_id-$mic_kernel_id"
+
+      echo "Generate test-509-$suffix -> gpu/mic:$gpu_portion/$mic_portion with kernel #$gpu_kernel_id on GPU and kernel #$mic_kernel_id on MIC"
+      echo
+
+      echo >> compile-509.log
+      echo "Generate test-509-$suffix -> gpu/mic:$gpu_portion/$mic_portion with kernel #$gpu_kernel_id on GPU and kernel #$mic_kernel_id on MIC" >> compile-509.log
+      echo >> compile-509.log
+
+      echo "gcc $CC $OPENACC_CFLAGS $OPENCL_CFLAGS $SQLITE_CFLAGS $HOST_DATA_CFLAGS $MULTIDEV_CFLAGS -c @abs_srcdir@/host-data-509.c -o host-data-509-$suffix.o" >> compile-509.log
+      gcc $CC $OPENACC_CFLAGS $OPENCL_CFLAGS $SQLITE_CFLAGS $HOST_DATA_CFLAGS $MULTIDEV_CFLAGS -c @abs_srcdir@/host-data-509.c -o host-data-509-$suffix.o &>> compile-509.log
+
+      echo "gcc $CC $OPENACC_LDFLAGS $OPENCL_LDFLAGS $SQLITE_LDFLAGS -lrt host-data-509-$suffix.o main-509.o -o test-509-$suffix" >> compile-509.log
+      gcc $CC $OPENACC_LDFLAGS $OPENCL_LDFLAGS $SQLITE_LDFLAGS -lrt host-data-509-$suffix.o main-509.o -o test-509-$suffix &>> compile-509.log
+    done
+  done
+done
+
