@@ -6,3 +6,6 @@ SQLITE_CFLAGS=-I@sqlite_inc_path@
 main-109.o: main-109.c
 	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-109.c -o main-109.o
 
+main-509.o: main-509.c
+	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-509.c -o main-509.o
+
