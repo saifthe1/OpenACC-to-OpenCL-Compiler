@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@abs_top_srcdir@/libopenacc/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@abs_top_srcdir@/libopenacc/lib
 
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 

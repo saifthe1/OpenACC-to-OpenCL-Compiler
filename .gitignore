@@ -54,7 +54,6 @@ tests/X09-tunning/compile-109.sh
 tests/X09-tunning/compile-509.sh
 tests/X09-tunning/X09-version.make
 tests/X09-tunning/X09.make
-tests/X09-tunning/versions.tar.gz
 tests/X09-tunning/version-*
 
 benchmark/generate.sh

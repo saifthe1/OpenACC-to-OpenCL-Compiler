@@ -1,8 +1,8 @@
 #!/bin/bash
 
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@
 
-SQLITE=@sqlite_lib_path@/../bin/sqlite3
+export PATH=@sqlite_lib_path@/../bin/sqlite3:$PATH
 
 if [ ! -r $1 ]
 then
