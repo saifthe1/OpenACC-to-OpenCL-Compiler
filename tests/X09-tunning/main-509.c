@@ -10,9 +10,8 @@
 #include "OpenACC/private/runtime.h"
 #include "OpenACC/private/init.h"
 
+#include "OpenACC/utils/timer.h"
 #include "OpenACC/utils/profiling.h"
-
-#include "sqlite3.h"
 
 #include <math.h>
 
@@ -35,8 +34,11 @@ void kernel_509(
   int n, int m, int p,
   float ** a, float ** b, float ** c,
   unsigned long num_gang_0, unsigned long num_worker_0, unsigned long vector_length_0,
-  unsigned long num_gang_1, unsigned long num_worker_1, unsigned long vector_length_1
+  unsigned long num_gang_1, unsigned long num_worker_1, unsigned long vector_length_1,
+  acc_timer_t data_timer, acc_timer_t comp_timer
 ) {
+  acc_timer_start(data_timer);
+
   acc_push_data_environment();
 
   acc_region_t region_0 = acc_build_region(&region_desc_0);
@@ -57,6 +59,8 @@ void kernel_509(
   acc_present_or_copyin_regions_(region_0, a[0], n * p * sizeof(float));
   acc_present_or_copyin_regions_(region_0, b[0], p * m * sizeof(float));
   acc_present_or_create_regions_(region_0, c[0], n * m * sizeof(float));
+
+  acc_timer_start(comp_timer);
 
   acc_region_start(region_0); // construct parallel start
 
@@ -94,9 +98,13 @@ void kernel_509(
 
   acc_region_stop(region_0); // construct parallel stop
 
+  acc_timer_stop(comp_timer);
+
   acc_present_or_copyout_regions_(region_0, c[0], n * m *sizeof(float));
  
   acc_pop_data_environment();
+
+  acc_timer_stop(data_timer);
 }
 
 void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float *** c);
@@ -107,7 +115,7 @@ int main(int argc, char ** argv) {
   // Initialize OpenACC (for profiling)
   acc_init_once();
 
-  char * experiment_desc = " gpu_kernel_id INT, mic_kernel_id INT, gpu_portion INT, mic_portion INT, gpu_gang INT, gpu_worker INT, mic_gang INT, mic_worker INT, n INT, m INT, p INT ";
+  char * experiment_desc = " gpu_kernel_id INT, mic_kernel_id INT, gpu_portion INT, mic_portion INT, gpu_gang INT, gpu_worker INT, mic_gang INT, mic_worker INT, n INT, m INT, p INT , comp_time BIGINT , data_time BIGINT ";
   acc_profiling_set_experiment(experiment_desc);
 
   assert(argc == 8);
@@ -125,7 +133,7 @@ int main(int argc, char ** argv) {
   size_t p = atoi(argv[7]);
 
   char run_desc[1024];
-  sprintf(run_desc, " '%zd' , '%zd' , '%u' , '%u' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
+  sprintf(run_desc, " '%zd' , '%zd' , '%u' , '%u' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '0' , '0' ",
                     gpu_kernel_id, mic_kernel_id, portions[0], portions[1], num_gang_0, num_worker_0, num_gang_1, num_worker_1, n, m, p);
   acc_profiling_new_run(run_desc);
 
@@ -137,7 +145,19 @@ int main(int argc, char ** argv) {
 
   init_data(n, m, p, &a, &b, &c);
 
-  kernel_509(n, m, p, a, b, c, num_gang_0, num_worker_0, vector_length_0, num_gang_1, num_worker_1, vector_length_1);
+  acc_timer_t data_timer = acc_timer_build();
+  acc_timer_t comp_timer = acc_timer_build();
+
+  kernel_509(n, m, p, a, b, c, num_gang_0, num_worker_0, vector_length_0, num_gang_1, num_worker_1, vector_length_1, data_timer, comp_timer);
+
+  acc_timer_delta(comp_timer);
+  acc_timer_delta(data_timer);
+
+  char db_query[1024];
+  sprintf(db_query, "UPDATE Runs SET comp_time='%d', data_time='%d' where rowid='%d'", comp_timer->delta, data_timer->delta, acc_profiler->run_id);
+  char * err_msg;
+  int status = sqlite3_exec (acc_profiler->db_file, db_query, NULL, 0, &err_msg);
+  assert (status == SQLITE_OK);
 
   free_data(a, b, c);
 
