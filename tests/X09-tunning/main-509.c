@@ -69,10 +69,10 @@ void kernel_509(
     kernel_0->param_ptrs[2] = &p;
 
     // Set data arguments
-    kernel_0->data_ptrs[0] = b[0];
-    kernel_0->data_size[0] = p * m * sizeof(float);
-    kernel_0->data_ptrs[1] = a[0];
-    kernel_0->data_size[1] = n * p * sizeof(float);
+    kernel_0->data_ptrs[0] = a[0];
+    kernel_0->data_size[0] = n * p * sizeof(float);
+    kernel_0->data_ptrs[1] = b[0];
+    kernel_0->data_size[1] = p * m * sizeof(float);
     kernel_0->data_ptrs[2] = c[0];
     kernel_0->data_size[2] = n * m * sizeof(float);
 

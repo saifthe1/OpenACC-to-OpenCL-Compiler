@@ -184,7 +184,7 @@ struct acc_kernel_desc_t_ kernel_desc_0_0 = {
   0, NULL,
   3,
   3,
-  1, versions,
+  2, versions,
   &kernel_splitted_loop
 };
 
