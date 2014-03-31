@@ -1,0 +1,31 @@
+
+OPENACC_CFLAGS=-I@abs_top_srcdir@/libopenacc/include
+OPENACC_LDFLAGS=-L@abs_top_srcdir@/libopenacc/lib -lopenacc
+
+OPENCL_CFLAGS=-I@opencl_inc_path@
+OPENCL_LDFLAGS=-L@opencl_lib_path@ -lOpenCL
+
+SQLITE_CFLAGS=-I@sqlite_inc_path@
+SQLITE_LDFLAGS=-L@sqlite_lib_path@ -lsqlite3
+
+LIBOPENACC_DIR=@abs_top_srcdir@/libopenacc
+KERNEL_DIR=$(shell pwd)
+
+HOST_DATA_CFLAGS=-DLIBOPENACC_DIR=\"$(LIBOPENACC_DIR)\" -DKERNEL_DIR=\"$(KERNEL_DIR)\" -DNUM_DEVICES=3
+
+all: test-509
+
+test-509: main-509.o host-data-509.o
+	$(CC) $(OPENACC_LDFLAGS) $(OPENCL_LDFLAGS) $(SQLITE_LDFLAGS) -lrt host-data-509.o main-509.o -o test-509
+
+host-data-509.o: host-data-509.c
+	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data-509.c -o host-data-509.o
+
+main-509.o: main-509.c
+	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-509.c -o main-509.o
+
+check: test-509 
+
+clean:
+	rm -f *.o test-509
+

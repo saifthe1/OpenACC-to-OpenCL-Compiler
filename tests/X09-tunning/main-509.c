@@ -26,15 +26,19 @@ typedef struct acc_region_t_ * acc_region_t;
 extern struct acc_kernel_desc_t_ kernel_desc_0_0;
 extern struct acc_region_desc_t_ region_desc_0;
 
-extern unsigned portions[2];
-extern size_t gpu_kernel_id;
-extern size_t mic_kernel_id;
+struct {
+  acc_device_t kind;
+  size_t num;
+} dev_list[3] = { {acc_device_GTX_460, 0}, {acc_device_e5_2620, 0}, {acc_device_xeonphi, 0} };
+
+unsigned portions[3];
+
+size_t version_by_devices[3];
 
 void kernel_509(
   int n, int m, int p,
   float ** a, float ** b, float ** c,
-  unsigned long num_gang_0, unsigned long num_worker_0, unsigned long vector_length_0,
-  unsigned long num_gang_1, unsigned long num_worker_1, unsigned long vector_length_1,
+  unsigned long num_gang[3], unsigned long num_worker[3], unsigned long vector_length[3],
   acc_timer_t data_timer, acc_timer_t comp_timer
 ) {
   acc_timer_start(data_timer);
@@ -43,18 +47,24 @@ void kernel_509(
 
   acc_region_t region_0 = acc_build_region(&region_desc_0);
 
-    region_0->devices[0].num_gang = num_gang_0;
-    region_0->devices[0].num_worker = num_worker_0;
-    region_0->devices[0].vector_length = vector_length_0;
+    region_0->devices[0].num_gang = num_gang[0];
+    region_0->devices[0].num_worker = num_worker[0];
+    region_0->devices[0].vector_length = vector_length[0];
 
-    region_0->devices[1].num_gang = num_gang_1;
-    region_0->devices[1].num_worker = num_worker_1;
-    region_0->devices[1].vector_length = vector_length_1;
+    region_0->devices[1].num_gang = num_gang[1];
+    region_0->devices[1].num_worker = num_worker[1];
+    region_0->devices[1].vector_length = vector_length[1];
+
+    region_0->devices[2].num_gang = num_gang[2];
+    region_0->devices[2].num_worker = num_worker[2];
+    region_0->devices[2].vector_length = vector_length[2];
 
     region_0->distributed_data[0].ptr  = a[0];
     region_0->distributed_data[0].size = n;
     region_0->distributed_data[1].ptr  = c[0];
     region_0->distributed_data[1].size = n;
+    region_0->distributed_data[2].ptr  = b[0];
+    region_0->distributed_data[2].size = n;
 
   acc_present_or_copyin_regions_(region_0, a[0], n * p * sizeof(float));
   acc_present_or_copyin_regions_(region_0, b[0], p * m * sizeof(float));
@@ -112,29 +122,51 @@ void free_data(float ** a, float ** b, float ** c);
 
 int main(int argc, char ** argv) {
 
+  if (argc != 16) {
+    printf("Usage: %s mun_gang[3] num_worker[3] portions[3] version_by_devices[3] n m p\n", argv[0]);
+    exit(-1);
+  }
+
+  size_t num_gang[3] = {atoi(argv[1]), atoi(argv[2]), atoi(argv[3])};
+
+  size_t num_worker[3] = {atoi(argv[4]), atoi(argv[5]), atoi(argv[6])};
+
+  portions[0] = atoi(argv[7]);
+  portions[1] = atoi(argv[8]);
+  portions[2] = atoi(argv[9]);
+
+  version_by_devices[0] = atoi(argv[10]);
+  version_by_devices[1] = atoi(argv[11]);
+  version_by_devices[2] = atoi(argv[12]);
+
+  size_t n = atoi(argv[13]);
+  size_t m = atoi(argv[14]);
+  size_t p = atoi(argv[15]);
+
+  size_t vector_length[3] = {1,1,1};
+
   // Initialize OpenACC (for profiling)
   acc_init_once();
 
-  char * experiment_desc = " gpu_kernel_id INT, mic_kernel_id INT, gpu_portion INT, mic_portion INT, gpu_gang INT, gpu_worker INT, mic_gang INT, mic_worker INT, n INT, m INT, p INT , comp_time BIGINT , data_time BIGINT ";
+  // Set the experiment (Configure 'Runs' table in DB)
+  char * experiment_desc = "gpu_kernel_id INT, cpu_kernel_id INT, mic_kernel_id INT, "\
+                           "gpu_portion INT, cpu_portion INT, mic_portion INT, "\
+                           "gpu_gang INT, gpu_worker INT, "\
+                           "cpu_gang INT, cpu_worker INT, "\
+                           "mic_gang INT, mic_worker INT, "\
+                           "n INT, m INT, p INT , "\
+                           "comp_time BIGINT , data_time BIGINT ";
   acc_profiling_set_experiment(experiment_desc);
 
-  assert(argc == 8);
-
-  size_t num_gang_0 = atoi(argv[1]);
-  size_t num_worker_0 = atoi(argv[2]);
-  size_t vector_length_0 = 1;
-
-  size_t num_gang_1 = atoi(argv[3]);
-  size_t num_worker_1 = atoi(argv[4]);
-  size_t vector_length_1 = 1;
-
-  size_t n = atoi(argv[5]);
-  size_t m = atoi(argv[6]);
-  size_t p = atoi(argv[7]);
-
+  // Add current run in 'Runs' table
   char run_desc[1024];
-  sprintf(run_desc, " '%zd' , '%zd' , '%u' , '%u' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '0' , '0' ",
-                    gpu_kernel_id, mic_kernel_id, portions[0], portions[1], num_gang_0, num_worker_0, num_gang_1, num_worker_1, n, m, p);
+  sprintf(run_desc, " '%zd' , '%zd' , '%zd' , '%u' , '%u', '%u' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' , '0' , '0' ",
+                    version_by_devices[0], version_by_devices[1], version_by_devices[2],
+                    portions[0], portions[1], portions[2],
+                    num_gang[0], num_worker[0],
+                    num_gang[1], num_worker[1],
+                    num_gang[2], num_worker[2],
+                    n, m, p);
   acc_profiling_new_run(run_desc);
 
   int i, j;
@@ -148,11 +180,12 @@ int main(int argc, char ** argv) {
   acc_timer_t data_timer = acc_timer_build();
   acc_timer_t comp_timer = acc_timer_build();
 
-  kernel_509(n, m, p, a, b, c, num_gang_0, num_worker_0, vector_length_0, num_gang_1, num_worker_1, vector_length_1, data_timer, comp_timer);
+  kernel_509(n, m, p, a, b, c, num_gang, num_worker, vector_length, data_timer, comp_timer);
 
   acc_timer_delta(comp_timer);
   acc_timer_delta(data_timer);
 
+  // Update 'Runs' table with host-side timers.
   char db_query[1024];
   sprintf(db_query, "UPDATE Runs SET comp_time='%d', data_time='%d' where rowid='%d'", comp_timer->delta, data_timer->delta, acc_profiler->run_id);
   char * err_msg;
