@@ -1,8 +1,6 @@
 #!/bin/bash
 
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@boost_path@/lib
-
-SQLITE=@sqlite_lib_path@/../bin/sqlite3
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@boost_path@/lib
 
 echo
 echo "*****************"
@@ -10,58 +8,31 @@ echo "* Configuration *"
 echo "*****************"
 echo
 
-> generation-config.log
-
 if [ -n "$KLT_GENERATOR" ]
 then
   echo "User-defined KLT_GENERATOR = $KLT_GENERATOR"
-  echo "User-defined KLT_GENERATOR = $KLT_GENERATOR" >> generation-config.log
 else
-  KLT_GENERATOR=@abs_top_srcdir@/rose-build/projects/openacc-to-opencl/compiler/openacc-to-opencl
+  KLT_GENERATOR=@abs_top_srcdir@/rose-build/projects/openacc-to-opencl/compiler/looptree-to-opencl
   echo "Default KLT_GENERATOR = $KLT_GENERATOR"
-  echo "Default KLT_GENERATOR = $KLT_GENERATOR" >> generation-config.log
 fi
 
 if [ -n "$OPENACC_INC_PATH" ]
 then
   echo "User-defined OPENACC_INC_PATH = $OPENACC_INC_PATH"
-  echo "User-defined OPENACC_INC_PATH = $OPENACC_INC_PATH" >> generation-config.log
 else
-  OPENACC_INC_PATH=@abs_top_srcdir@/libopenacc/include
+  OPENACC_INC_PATH=@abs_top_srcdir@/libopenacc/include/
   echo "Default OPENACC_INC_PATH = $OPENACC_INC_PATH"
-  echo "Default OPENACC_INC_PATH = $OPENACC_INC_PATH" >> generation-config.log
 fi
 
 if [ -n "$OPENCL_INC_PATH" ]
 then
   echo "User-defined OPENCL_INC_PATH = $OPENCL_INC_PATH"
-  echo "User-defined OPENCL_INC_PATH = $OPENCL_INC_PATH" >> generation-config.log
 else
   OPENCL_INC_PATH=@opencl_inc_path@
   echo "Default OPENCL_INC_PATH = $OPENCL_INC_PATH"
-  echo "Default OPENCL_INC_PATH = $OPENCL_INC_PATH" >> generation-config.log
 fi
 
 INC_PATHS="$OPENACC_INC_PATH $OPENCL_INC_PATH"
-
-echo
-echo "********************"
-echo "* Create data base *"
-echo "********************"
-echo
-
-rm -f versions.db
-$SQLITE versions.db "create table versions(\
-                     id  smallint,\
-                     loop_gang char,\
-                     loop_worker char,\
-                     loop_0_tile_0 smallint,\
-                     loop_0_tile_1 smallint,\
-                     loop_0_tile_2 smallint,\
-                     loop_1_tile_0 smallint,\
-                     loop_1_tile_1 smallint,\
-                     loop_1_tile_2 smallint\
-                  );"
 
 echo
 echo "**************"
@@ -69,115 +40,10 @@ echo "* Generation *"
 echo "**************"
 echo
 
-rm -rf versions.tar.gz version-*
-i=0
+rm -rf versions.tar.gz
 
-acc_version=@abs_top_srcdir@/tests/109/gang-i-worker-i.lt
-
-echo " gang and worker on loop i"
-echo " -------------------------"
-
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'i', 0, 1, 1, 0, 1, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 0 1 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'i', 1, 0, 1, 0, 1, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 1 0 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'i', 1, 1, 0, 0, 1, 1);"
-cd ..
-
-echo " gang on loop i and worker on loop j"
-echo " -----------------------------------"
-
-acc_version=@abs_top_srcdir@/tests/109/gang-i-worker-j.lt
-
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 1 0 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'j', 0, 1, 1, 1, 0, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 1 1 0 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'j', 0, 1, 1, 1, 1, 0);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 0 1 1 0 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'j', 1, 0, 1, 1, 0, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 0 1 1 1 0 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'i', 'j', 1, 0, 1, 1, 1, 0);"
-cd ..
-
-echo " gang on loop j and worker on loop i"
-echo " -----------------------------------"
-
-acc_version=@abs_top_srcdir@/tests/109/gang-j-worker-i.lt
-
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 0 1 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'i', 1, 0, 1, 0, 1, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 0 1 1 0 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'i', 1, 0, 1, 1, 0, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 1 0 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'i', 1, 1, 0, 0, 1, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 1 1 0 1 0 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'i', 1, 1, 0, 1, 0, 1);"
-cd ..
-
-echo " gang and worker on loop j"
-echo " -------------------------"
-
-acc_version=@abs_top_srcdir@/tests/109/gang-j-worker-j.lt
-
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 0 1 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'j', 0, 1, 1, 0, 1, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 1 0 1 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'j', 0, 1, 1, 1, 0, 1);"
-cd ..
-i=$(($i+1))
-mkdir version-$i
-cd version-$i
-  $KLT_GENERATOR $acc_version $INC_PATHS 0 1 1 1 1 0 &> generation.log
-  $SQLITE ../versions.db "insert into versions values($i, 'j', 'j', 0, 1, 1, 1, 1, 0);"
-cd ..
+echo "$KLT_GENERATOR $INC_PATHS versions.db @abs_top_srcdir@/tests/109/gang-i-worker-i.lt @abs_top_srcdir@/tests/109/gang-i-worker-j.lt @abs_top_srcdir@/tests/109/gang-j-worker-i.lt @abs_top_srcdir@/tests/109/gang-j-worker-j.lt"
+$KLT_GENERATOR $INC_PATHS versions.db @abs_top_srcdir@/tests/109/gang-i-worker-i.lt @abs_top_srcdir@/tests/109/gang-i-worker-j.lt @abs_top_srcdir@/tests/109/gang-j-worker-i.lt @abs_top_srcdir@/tests/109/gang-j-worker-j.lt
 
 echo
 echo "************"
@@ -188,10 +54,11 @@ echo
 echo " Create Archive"
 echo " --------------"
 
-tar -czf versions.tar.gz generation-config.log versions.db main-109.c version-*
+rm -f tunning-109.tar.gz
+tar -czf tunning-109.tar.gz versions.db main-109.c host-data.c kernels.cl
 
 echo " Clean"
 echo " -----"
 
-rm -rf generation-config.log versions.db version-*
+rm -rf versions.db version-* host-data.c kernels.cl
 

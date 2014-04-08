@@ -19,14 +19,14 @@ __kernel void kernel_0x3087c70_0(
 
   for (
     i_tile_0  = context->loops[0].original.lower;
-    i_tile_0  < context->loops[0].original.upper;
+    i_tile_0  < context->loops[0].original.lower + ctx->loops[0].tiles[e_tile_0].length
     i_tile_0 += context->loops[0].tiles[0].stride
   ) {
     i_gang = acc_gang_iteration(context,0,i_tile_0);
 //    if (i_gang >= context->loops[0].original.lower && i_gang < context->loops[0].original.upper) {
       for (
         j_tile_0  = context->loops[1].original.lower;
-        j_tile_0  < context->loops[1].original.upper;
+        j_tile_0  < context->loops[1].original.lower + ctx->loops[1].tiles[e_tile_0].length;
         j_tile_0 += context->loops[1].tiles[0].stride
       ) {
         j_worker = acc_worker_iteration(context,1,j_tile_0);
