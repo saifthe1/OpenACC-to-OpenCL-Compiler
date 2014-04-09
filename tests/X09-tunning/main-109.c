@@ -17,6 +17,9 @@
 #include "OpenACC/private/runtime.h"
 #include "OpenACC/private/init.h"
 
+#include "OpenACC/internal/region.h"
+#include "OpenACC/internal/kernel.h"
+
 #include "OpenACC/utils/profiling.h"
 
 #include "sqlite3.h"
@@ -24,6 +27,7 @@
 #include <math.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #include <assert.h>
@@ -106,7 +110,7 @@ int main(int argc, char ** argv) {
   // Initialize OpenACC (for profiling)
   acc_init_once();
 
-  char * experiment_desc = " version_id INT, acc_device_type CHAR(40), gang INT, worker INT, n INT, m INT, p INT ";
+  char * experiment_desc = " version_by_devices[0] INT, acc_device_type CHAR(40), gang INT, worker INT, n INT, m INT, p INT ";
   acc_profiling_set_experiment(experiment_desc);
 
   assert(argc == 7);
@@ -119,11 +123,30 @@ int main(int argc, char ** argv) {
   size_t m = atoi(argv[4]);
   size_t p = atoi(argv[5]);
 
-  int version_id = atoi(argv[6]);
+  // Set the kernel version to be used
+  size_t version_by_devices[1];
+  version_by_devices[0] = atoi(argv[6]);
+  kernel_desc_0_0.version_by_devices = version_by_devices;
+
+  assert(version_by_devices[0] < kernel_desc_0_0.num_versions);
+
+  // Set compilation flags for OpenCL codes
+  region_desc_0.num_options = 2;
+  region_desc_0.options = malloc(region_desc_0.num_options * sizeof(char *));
+  size_t ocl_comp_opt_cnt = 0;
+
+  // Add debug flag
+  region_desc_0.options[ocl_comp_opt_cnt++] = "-g";
+
+  // Enable the requested version of the kernel
+  assert(kernel_desc_0_0.versions[version_by_devices[0]] != NULL);
+  region_desc_0.options[ocl_comp_opt_cnt] = malloc((10 + strlen(kernel_desc_0_0.name) + strlen(kernel_desc_0_0.versions[version_by_devices[0]]->suffix)) * sizeof(char));
+  sprintf(region_desc_0.options[ocl_comp_opt_cnt], "-DENABLE_%s%s", kernel_desc_0_0.name, kernel_desc_0_0.versions[version_by_devices[0]]->suffix);
+  ocl_comp_opt_cnt++;
 
   char run_desc[1024];
-  sprintf(run_desc, " '%d' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
-                    version_id, acc_device_name[acc_runtime.curr_device_type], num_gang, num_worker, n, m, p);
+  sprintf(run_desc, " '%zd' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
+                    version_by_devices[0], acc_device_name[acc_runtime.curr_device_type], num_gang, num_worker, n, m, p);
   acc_profiling_new_run(run_desc);
 
   int i, j;

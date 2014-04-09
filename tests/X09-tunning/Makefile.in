@@ -13,6 +13,8 @@ KERNEL_DIR=$(shell pwd)
 
 HOST_DATA_CFLAGS=-DLIBOPENACC_DIR=\"$(LIBOPENACC_DIR)\" -DKERNEL_DIR=\"$(KERNEL_DIR)\" -DNUM_DEVICES=3
 
+CFLAGS=-g
+
 all: test-109 test-509
 
 # 109
@@ -21,17 +23,17 @@ test-109: main-109.o host-data.o
 	$(CC) $(OPENACC_LDFLAGS) $(OPENCL_LDFLAGS) $(SQLITE_LDFLAGS) -lrt host-data.o main-109.o -o test-109
 
 host-data.o: host-data.c
-	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data.c -o host-data.o
+	$(CC) $(CFLAGS) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data.c -o host-data.o
 
 main-109.o: main-109.c
-	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-109.c -o main-109.o
+	$(CC) $(CFLAGS) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-109.c -o main-109.o
 
 host-data.c: \
             @abs_top_srcdir@/tests/109/gang-i-worker-i.lt \
             @abs_top_srcdir@/tests/109/gang-j-worker-j.lt \
             @abs_top_srcdir@/tests/109/gang-i-worker-j.lt \
             @abs_top_srcdir@/tests/109/gang-j-worker-i.lt
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):@boost_path@/lib @abs_top_srcdir@/rose-build-opt/projects/openacc-to-opencl/compiler/looptree-to-opencl \
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):@boost_path@/lib @abs_top_srcdir@/rose-build/projects/openacc-to-opencl/compiler/looptree-to-opencl \
             @abs_top_srcdir@/libopenacc/include/ \
             @opencl_inc_path@ \
             versions.db \
@@ -46,10 +48,10 @@ test-509: main-509.o host-data-509.o
 	$(CC) $(OPENACC_LDFLAGS) $(OPENCL_LDFLAGS) $(SQLITE_LDFLAGS) -lrt host-data-509.o main-509.o -o test-509
 
 host-data-509.o: host-data-509.c
-	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data-509.c -o host-data-509.o
+	$(CC) $(CFLAGS) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) $(HOST_DATA_CFLAGS) -c host-data-509.c -o host-data-509.o
 
 main-509.o: main-509.c
-	$(CC) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-509.c -o main-509.o
+	$(CC) $(CFLAGS) $(OPENACC_CFLAGS) $(OPENCL_CFLAGS) $(SQLITE_CFLAGS) -c main-509.c -o main-509.o
 
 check: test-109 test-509 
 
