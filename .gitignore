@@ -1,5 +1,6 @@
 rose-build
 rose-install
+rose-build-opt
 
 evaluation/Makefile
 libopenacc/lib/Makefile
@@ -52,11 +53,12 @@ tests/X09-tunning/generate-109.sh
 tests/X09-tunning/execute-109.sh
 tests/X09-tunning/compile-109.sh
 tests/X09-tunning/compile-509.sh
-tests/X09-tunning/X09-version.make
-tests/X09-tunning/X09.make
-tests/X09-tunning/version-*
+tests/X09-tunning/test-109
 tests/X09-tunning/test-509
 tests/X09-tunning/Makefile
+tests/X09-tunning/callgrind.out.*
+tests/X09-tunning/host-data.c
+tests/X09-tunning/kernels.cl
 
 benchmark/generate.sh
 benchmark/compile.sh
@@ -68,4 +70,5 @@ benchmark/config.rc
 *.log
 *.db
 *.sl3
+*.csv
 
