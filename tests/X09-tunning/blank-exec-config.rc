@@ -1,0 +1,26 @@
+
+# Device type: Value to use for the environment variable ACC_DEVICE_TYPE
+device_type=
+
+# Gang range: [ 2^min, ..., 2^max ] (inclusive)
+gang_exp_min=
+gang_exp_max=
+
+# Worker range: [ 2^min, ..., 2^max ] (inclusive)
+worker_exp_min=
+worker_exp_max=
+
+# Test 109 computes the product of 2 matrices of size NxP and PxM producing a matrix of size NxM
+
+# N range: [ 2^min, ..., 2^max ] (inclusive)
+n_exp_min=
+n_exp_max=
+
+# M range: [ 2^min, ..., 2^max ] (inclusive)
+m_exp_min=
+m_exp_max=
+
+# P range: [ 2^min, ..., 2^max ] (inclusive)
+p_exp_min=
+p_exp_max=
+
