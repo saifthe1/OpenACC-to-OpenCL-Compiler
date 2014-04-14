@@ -1,10 +1,6 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@sqlite_lib_path@:@abs_top_srcdir@/libopenacc/lib
-
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-
-SQLITE=@sqlite_lib_path@/../bin/sqlite3
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@abs_top_srcdir@/libopenacc/lib
 
 echo
 echo "*************"
@@ -22,16 +18,16 @@ fi
 # Look for the last versions previously executed
 if [ -r $2 ]
 then
-  last_executed_version=`$SQLITE $1 "select max(version_id) from Runs;"`
+  last_executed_version=`sqlite3 $1 "select max(version_id) from Runs;"`
   if [ ! -z $last_executed_version ]
   then
     # Remove emtry for the last executed version (might have not executed all configuration)
-    run_ids=`$SQLITE $1 "Select rowid from Runs where version_id='$last_executed_version';"`
+    run_ids=`sqlite3 $1 "Select rowid from Runs where version_id='$last_executed_version';"`
     for run in $run_ids
     do
-      $SQLITE $1 "Delete from Events where run_id='$run';"
+      sqlite3 $1 "Delete from Events where run_id='$run';"
     done
-    $SQLITE $1 "Delete from Runs where version_id='$last_executed_version';"
+    sqlite3 $1 "Delete from Runs where version_id='$last_executed_version';"
   else
     last_executed_version=0
   fi
@@ -42,7 +38,7 @@ fi
 # Load device type and ranges for n/m/p and gang/worker
 source $3
 
-for version_id in `$SQLITE $1 "select version_id from Versions where region_id=='0' and kernel_id=='0' and version_id >= '$last_executed_version';"`
+for version_id in `sqlite3 $1 "select version_id from Versions where region_id=='0' and kernel_id=='0' and version_id >= '$last_executed_version';"`
 do
 
   if [ $version_id -lt $last_executed_version ]
