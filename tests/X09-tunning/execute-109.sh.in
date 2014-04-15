@@ -28,13 +28,13 @@ fi
 # Determine the range from argument, if present, or from the database
 if [ -z $4 ]
 then
-  lb_version_range=`sqlite3 $1 "select min(version_id) from Runs;"`
-  ub_version_range=`sqlite3 $1 "select max(version_id) from Runs;"`
+  lb_version_range=`sqlite3 $1 "select min(version_id) from Versions;"`
+  ub_version_range=`sqlite3 $1 "select max(version_id) from Versions;"`
 else
   lb_version_range=$4
   if [ -z $5 ]
   then
-    ub_version_range=`sqlite3 $1 "select max(version_id) from Runs;"`
+    ub_version_range=`sqlite3 $1 "select max(version_id) from Versions;"`
   else
     ub_version_range=$5
   fi
@@ -43,7 +43,7 @@ fi
 # Look for the last versions previously executed (in the range)
 if [ -r $2 ]
 then
-  last_executed_version=`sqlite3 $2 "select max(version_id) from Versions where region_id=='0' and kernel_id=='0' and version_id >= '$lb_version_range' and version_id <= '$ub_version_range';"`
+  last_executed_version=`sqlite3 $2 "select max(version_id) from Runs where version_id >= '$lb_version_range' and version_id <= '$ub_version_range';"`
   if [ ! -z $last_executed_version ]
   then
     # Remove entry for the last executed version (might have not executed all configuration)

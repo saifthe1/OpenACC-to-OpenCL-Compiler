@@ -169,59 +169,90 @@ int main(int argc, char ** argv) {
   struct acc_loop_t_ * worker_loop;
   init_loops(&loop_i, &loop_j, &gang_loop, &worker_loop);
 
-  float ** a, ** b, ** c;
-  size_t n_exp, m_exp, p_exp;
-  for (n_exp = n_exp_min; n_exp <= n_exp_max; n_exp++) {
-    for (m_exp = m_exp_min; m_exp <= m_exp_max; m_exp++) {
-      for (p_exp = p_exp_min; p_exp <= p_exp_max; p_exp++) {
-        size_t n = power_of_2[n_exp];
-        size_t m = power_of_2[m_exp];
-        size_t p = power_of_2[p_exp];
+  size_t num_n_exp = n_exp_max - n_exp_min + 1;
+  size_t num_m_exp = m_exp_max - m_exp_min + 1;
+  size_t num_p_exp = p_exp_max - p_exp_min + 1;
 
-        // Determine the combinaison of gang/worker that can be used
-        size_t gw_pairs_count;
-        struct gang_worker_pair_t * gw_pairs;
+  struct gang_worker_pair_t ** gw_pairs_arr = malloc(num_n_exp * num_m_exp * num_p_exp * sizeof(struct gang_worker_pair_t *));
+  size_t * gw_pairs_count_arr = malloc(num_n_exp * num_m_exp * num_p_exp * sizeof(struct gang_worker_pair_t *));
+  size_t gw_pairs_count_total = 0;
+
+  size_t n_exp, m_exp, p_exp;
+  for (n_exp = n_exp_min; n_exp <= n_exp_max; n_exp++)
+    for (m_exp = m_exp_min; m_exp <= m_exp_max; m_exp++)
+      for (p_exp = p_exp_min; p_exp <= p_exp_max; p_exp++) {
         determine_gw_pairs(
-          &gw_pairs_count, &gw_pairs,
-          n, m, p,
+          &(gw_pairs_count_arr[ ( (n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min) ) * num_p_exp + (p_exp - p_exp_min) ]),
+          &(gw_pairs_arr[ ( (n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min) ) * num_p_exp + (p_exp - p_exp_min) ]),
+          power_of_2[n_exp], power_of_2[m_exp], power_of_2[p_exp],
           loop_i, loop_j,
           gang_loop, worker_loop,
           power_of_2,
           gang_exp_min, gang_exp_max,
           worker_exp_min, worker_exp_max
         );
+        gw_pairs_count_total += gw_pairs_count_arr[ ( (n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min) ) * num_p_exp + (p_exp - p_exp_min) ];
+      }
 
-        init_data(n, m, p, &a, &b, &c);
+  if (gw_pairs_count_total != 0) {
 
-        // Iterate over the combinaison of gang/worker
-        size_t i;
-        for (i = 0; i < gw_pairs_count; i++) {
-          size_t num_gang = gw_pairs[i].gang;
-          size_t num_worker = gw_pairs[i].worker;
-          size_t vector_length = 1;
+    // Initialize OpenACC (for profiling)
+    acc_init_once();
 
-          char * run_desc = (char *)malloc(1024 * sizeof(char));
-          sprintf(run_desc, " '%zd' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
-                            kernel_desc_0_0.version_by_devices[0], acc_device_name[acc_runtime.curr_device_type],
-                            num_gang, num_worker, n, m, p
-                  );
-          acc_profiling_new_run(run_desc);
+    // Set fields for Runs database
+    char * experiment_desc = " version_id INT, acc_device_type CHAR(40), gang INT, worker INT, n INT, m INT, p INT ";
+    acc_profiling_set_experiment(experiment_desc);
 
 #if PRINT_DB_ACCESS
-          printf("[db]     Insert in Runs table: \"%s\"\n", run_desc);
+    printf("[db]     Runs table are: %s\n", experiment_desc);
 #endif
 
-          kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
+    float ** a, ** b, ** c;
+    for (n_exp = n_exp_min; n_exp <= n_exp_max; n_exp++) {
+      for (m_exp = m_exp_min; m_exp <= m_exp_max; m_exp++) {
+        for (p_exp = p_exp_min; p_exp <= p_exp_max; p_exp++) {
+          size_t n = power_of_2[n_exp];
+          size_t m = power_of_2[m_exp];
+          size_t p = power_of_2[p_exp];
 
-          free(run_desc);
+          init_data(n, m, p, &a, &b, &c);
+
+          struct gang_worker_pair_t * gw_pairs = gw_pairs_arr[((n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min)) * num_p_exp + (p_exp - p_exp_min)];
+          size_t gw_pairs_count = gw_pairs_count_arr[((n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min)) * num_p_exp + (p_exp - p_exp_min)];
+
+          // Iterate over the combinaison of gang/worker
+          size_t i;
+          for (i = 0; i < gw_pairs_count; i++) {
+            size_t num_gang = gw_pairs[i].gang;
+            size_t num_worker = gw_pairs[i].worker;
+            size_t vector_length = 1;
+
+            char * run_desc = (char *)malloc(1024 * sizeof(char));
+            sprintf(run_desc, " '%zd' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
+                              kernel_desc_0_0.version_by_devices[0], acc_device_name[acc_runtime.curr_device_type],
+                              num_gang, num_worker, n, m, p
+                    );
+            acc_profiling_new_run(run_desc);
+
+#if PRINT_DB_ACCESS
+            printf("[db]     Insert in Runs table: \"%s\"\n", run_desc);
+#endif
+
+            kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
+
+            free(run_desc);
+          }
+
+          free_data(a, b, c);
+
+          free(gw_pairs);
         }
-
-        free_data(a, b, c);
-
-        free(gw_pairs);
       }
     }
   }
+
+  free(gw_pairs_arr);
+  free(gw_pairs_count_arr);
 
   acc_profiling_exit();
 
@@ -292,18 +323,6 @@ void init_args(
   (*power_of_2)[0] = 1;
   for (i = 1; i <= max_exp; i++)
     (*power_of_2)[i] = (*power_of_2)[i-1] * 2;
-
-  // Initialize OpenACC (for profiling)
-  acc_init_once();
-
-  // Set fields for Runs database
-  char * experiment_desc = " version_id INT, acc_device_type CHAR(40), gang INT, worker INT, n INT, m INT, p INT ";
-  acc_profiling_set_experiment(experiment_desc);
-
-
-#if PRINT_DB_ACCESS
-  printf("[db]     Runs table are: %s\n", experiment_desc);
-#endif
 
   // Check usage
   if (argc != 12) {
@@ -390,26 +409,26 @@ void init_loops(
 #if PRINT_INFO
   if (*gang_loop == *worker_loop) {
     printf("[info]   gang_loop = worker_loop = %s : ( %zd , %zd , %zd , %zd , %zd )\n",
-               gang_loop == loop_i ? "loop_i" : "loop_j",
-               gang_loop->num_iterations[e_tile_0],
-               gang_loop->num_iterations[e_gang],
-               gang_loop->num_iterations[e_tile_1],
-               gang_loop->num_iterations[e_worker],
-               gang_loop->num_iterations[e_tile_2]
+               *gang_loop == loop_i ? "loop_i" : "loop_j",
+               (*gang_loop)->num_iterations[e_tile_0],
+               (*gang_loop)->num_iterations[e_gang],
+               (*gang_loop)->num_iterations[e_tile_1],
+               (*gang_loop)->num_iterations[e_worker],
+               (*gang_loop)->num_iterations[e_tile_2]
           );
   }
   else {
     printf("[info]   gang_loop   = %s : ( %zd , %zd , %zd )\n",
                gang_loop == loop_i ? "loop_i" : "loop_j",
-               gang_loop->num_iterations[e_tile_0],
-               gang_loop->num_iterations[e_gang],
-               gang_loop->num_iterations[e_tile_1]
+               (*gang_loop)->num_iterations[e_tile_0],
+               (*gang_loop)->num_iterations[e_gang],
+               (*gang_loop)->num_iterations[e_tile_1]
           );
     printf("[info]   worker_loop = %s : ( %zd , %zd , %zd )\n",
-               worker_loop == loop_i ? "loop_i" : "loop_j",
-               worker_loop->num_iterations[e_tile_1],
-               worker_loop->num_iterations[e_worker],
-               worker_loop->num_iterations[e_tile_2]
+               *worker_loop == loop_i ? "loop_i" : "loop_j",
+               (*worker_loop)->num_iterations[e_tile_1],
+               (*worker_loop)->num_iterations[e_worker],
+               (*worker_loop)->num_iterations[e_tile_2]
           );
   }
 #endif
