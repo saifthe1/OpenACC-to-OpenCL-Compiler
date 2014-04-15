@@ -66,12 +66,14 @@ source $3
 make -C @abs_top_srcdir@/libopenacc
 make -C @abs_srcdir@ test-109
 
+export ACC_PROFILING_DB=$2
+export ACC_DEVICE_TYPE=$device_type
+
 for version_id in `sqlite3 $1 "select version_id from Versions where region_id=='0' and kernel_id=='0' and version_id >= '$last_executed_version' and version_id >= '$lb_version_range' and version_id <= '$ub_version_range';"`
 do
   echo "Execute version #$version_id"
-  ACC_PROFILING_DB=$2 ACC_DEVICE_TYPE=$device_type @abs_srcdir@/test-109         \
-         $n_exp_min $n_exp_max $m_exp_min $m_exp_max $p_exp_min $p_exp_max       \
-         $gang_exp_min $gang_exp_max $worker_exp_min $worker_exp_max $version_id
+  @abs_srcdir@/test-109 $n_exp_min $n_exp_max $m_exp_min $m_exp_max $p_exp_min $p_exp_max       \
+                        $gang_exp_min $gang_exp_max $worker_exp_min $worker_exp_max $version_id
 done
 
 echo "**********"
