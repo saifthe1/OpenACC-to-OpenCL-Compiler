@@ -57,9 +57,9 @@ void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float ***
 void free_data(float ** a, float ** b, float ** c);
 
 void init_args(
-  int argc, char ** argv, const size_t max_exp, size_t ** power_of_2,
+  int argc, char ** argv, const size_t max_exp, unsigned long ** power_of_2,
   size_t * n_exp_min, size_t * n_exp_max, size_t * m_exp_min, size_t * m_exp_max, size_t * p_exp_min, size_t * p_exp_max,
-  size_t * gang_exp_min, size_t * gang_exp_max, size_t * worker_exp_min, size_t * worker_exp_max
+  size_t * gang_exp_min, size_t * gang_exp_max, size_t * worker_exp_min, size_t * worker_exp_max, size_t * max_mem
 );
 
 void init_loops(
@@ -73,9 +73,10 @@ void determine_gw_pairs(
   size_t n, size_t m, size_t p,
   struct acc_loop_t_ * loop_i, struct acc_loop_t_ * loop_j,
   struct acc_loop_t_ * gang_loop, struct acc_loop_t_ * worker_loop,
-  size_t * power_of_2,
+  unsigned long * power_of_2,
   size_t gang_exp_min, size_t gang_exp_max,
-  size_t worker_exp_min, size_t worker_exp_max
+  size_t worker_exp_min, size_t worker_exp_max,
+  size_t max_mem
 );
 
 void kernel_109(
@@ -143,8 +144,8 @@ void kernel_109(
 }
 
 int main(int argc, char ** argv) {
-  const size_t max_exp = 20;
-  size_t * power_of_2;
+  const size_t max_exp = 35;
+  unsigned long * power_of_2;
   size_t n_exp_min;
   size_t n_exp_max;
   size_t m_exp_min;
@@ -155,11 +156,13 @@ int main(int argc, char ** argv) {
   size_t gang_exp_max;
   size_t worker_exp_min;
   size_t worker_exp_max;
+  size_t max_mem;
 
   init_args(
     argc, argv, max_exp, &power_of_2,
     &n_exp_min, &n_exp_max, &m_exp_min, &m_exp_max, &p_exp_min, &p_exp_max,
-    &gang_exp_min, &gang_exp_max, &worker_exp_min, &worker_exp_max
+    &gang_exp_min, &gang_exp_max, &worker_exp_min, &worker_exp_max,
+    &max_mem
   );
 
   // Dertermine which loop is used for gang/worker
@@ -189,7 +192,8 @@ int main(int argc, char ** argv) {
           gang_loop, worker_loop,
           power_of_2,
           gang_exp_min, gang_exp_max,
-          worker_exp_min, worker_exp_max
+          worker_exp_min, worker_exp_max,
+          max_mem
         );
         gw_pairs_count_total += gw_pairs_count_arr[ ( (n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min) ) * num_p_exp + (p_exp - p_exp_min) ];
       }
@@ -221,31 +225,34 @@ int main(int argc, char ** argv) {
           size_t gw_pairs_count = gw_pairs_count_arr[((n_exp - n_exp_min) * num_m_exp + (m_exp - m_exp_min)) * num_p_exp + (p_exp - p_exp_min)];
 
           // Iterate over the combinaison of gang/worker
-          size_t i;
-          for (i = 0; i < gw_pairs_count; i++) {
-            size_t num_gang = gw_pairs[i].gang;
-            size_t num_worker = gw_pairs[i].worker;
-            size_t vector_length = 1;
+          if (gw_pairs != NULL) {
+            size_t i;
+            for (i = 0; i < gw_pairs_count; i++) {
+              size_t num_gang = gw_pairs[i].gang;
+              size_t num_worker = gw_pairs[i].worker;
+              size_t vector_length = 1;
 
-            char * run_desc = (char *)malloc(1024 * sizeof(char));
-            sprintf(run_desc, " '%zd' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
-                              kernel_desc_0_0.version_by_devices[0], acc_device_name[acc_runtime.curr_device_type],
-                              num_gang, num_worker, n, m, p
-                    );
-            acc_profiling_new_run(run_desc);
+              char * run_desc = (char *)malloc(1024 * sizeof(char));
+              sprintf(run_desc, " '%zd' , '%s' , '%zd' , '%zd' , '%zd' , '%zd' , '%zd' ",
+                                kernel_desc_0_0.version_by_devices[0], acc_device_name[acc_runtime.curr_device_type],
+                                num_gang, num_worker, n, m, p
+                      );
+              acc_profiling_new_run(run_desc);
 
 #if PRINT_DB_ACCESS
-            printf("[db]     Insert in Runs table: \"%s\"\n", run_desc);
+              printf("[db]     Insert in Runs table: \"%s\"\n", run_desc);
 #endif
 
-            kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
+              kernel_109(n, m, p, a, b, c, num_gang, num_worker, vector_length);
 
-            free(run_desc);
+              free(run_desc);
+            }
           }
 
           free_data(a, b, c);
 
-          free(gw_pairs);
+          if (gw_pairs != NULL)
+            free(gw_pairs);
         }
       }
     }
@@ -291,7 +298,6 @@ void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float ***
 }
 
 void free_data(float ** a, float ** b, float ** c) {
-
   free(a[0]);
   free(a);
 
@@ -305,7 +311,7 @@ void free_data(float ** a, float ** b, float ** c) {
 void init_args(
   int argc, char ** argv,
   const size_t max_exp,
-  size_t ** power_of_2,
+  unsigned long ** power_of_2,
   size_t * n_exp_min,
   size_t * n_exp_max,
   size_t * m_exp_min,
@@ -315,17 +321,18 @@ void init_args(
   size_t * gang_exp_min,
   size_t * gang_exp_max,
   size_t * worker_exp_min,
-  size_t * worker_exp_max
+  size_t * worker_exp_max,
+  size_t * max_mem
 ) {
   // Precompute power of 2
   size_t i;
-  *power_of_2 = (size_t *)malloc((max_exp + 1) * sizeof(size_t));
+  *power_of_2 = (unsigned long *)malloc((max_exp + 1) * sizeof(unsigned long));
   (*power_of_2)[0] = 1;
   for (i = 1; i <= max_exp; i++)
     (*power_of_2)[i] = (*power_of_2)[i-1] * 2;
 
   // Check usage
-  if (argc != 12) {
+  if (argc != 13) {
     printf("usage: %s n_exp_min n_exp_max m_exp_min m_exp_max p_exp_min p_exp_max gang_exp_min gang_exp_max worker_exp_min worker_exp_max version_id\n", argv[0]);
     exit(-1);
   }
@@ -358,6 +365,9 @@ void init_args(
   size_t * version_by_devices = (size_t *)malloc(1 * sizeof(size_t));
   version_by_devices[0] = atoi(argv[11]);
   kernel_desc_0_0.version_by_devices = version_by_devices;
+
+  // Get the maximum allocatable memory (power of 2)
+  *max_mem = atoi(argv[12]);
 
   assert(version_by_devices[0] < kernel_desc_0_0.num_versions);
   assert(kernel_desc_0_0.versions[version_by_devices[0]] != NULL);
@@ -440,10 +450,21 @@ void determine_gw_pairs(
   size_t n, size_t m, size_t p,
   struct acc_loop_t_ * loop_i, struct acc_loop_t_ * loop_j,
   struct acc_loop_t_ * gang_loop, struct acc_loop_t_ * worker_loop,
-  size_t * power_of_2,
+  unsigned long * power_of_2,
   size_t gang_exp_min, size_t gang_exp_max,
-  size_t worker_exp_min, size_t worker_exp_max
+  size_t worker_exp_min, size_t worker_exp_max,
+  size_t max_mem
 ) {
+  unsigned long alloc_size = (n*m + n*p + p*m) * sizeof(float);
+  if (alloc_size >= power_of_2[max_mem]) {
+#if PRINT_INFO
+    printf("[info]   Skip size n = %zd, m = %zd, p = %zd\n", n, m, p);
+#endif
+    *gw_pairs_count = 0;
+    *gw_pairs = NULL;
+    return;
+  }
+
   // Determine the combinaison of gang/worker that can be used
   *gw_pairs_count = 0;
   size_t gw_pairs_size = 42;
@@ -533,6 +554,12 @@ void determine_gw_pairs(
         }
       }
     }
+  }
+
+  if (*gw_pairs_count == 0) {
+    free(*gw_pairs);
+    *gw_pairs = NULL;
+    return;
   }
 }
 

@@ -1,6 +1,7 @@
 
 # Device type: Value to use for the environment variable ACC_DEVICE_TYPE
 device_type=
+device_num=
 
 # Gang range: [ 2^min, ..., 2^max ] (inclusive)
 gang_exp_min=
@@ -23,4 +24,7 @@ m_exp_max=
 # P range: [ 2^min, ..., 2^max ] (inclusive)
 p_exp_min=
 p_exp_max=
+
+# Max memory capacity of the device
+max_mem=
 
