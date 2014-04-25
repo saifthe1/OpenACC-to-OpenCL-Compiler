@@ -20,7 +20,7 @@ void kernel_509(
                        num_gangs(num_gang_0, num_gang_1) \
                        num_workers(num_worker_0, num_worker_1) \
                        vector_length(vector_length_0, vector_length_1)
-  #pragma acc loop gang split(contiguous, 9, 7) read(a, [i][0:p]) read(b, ALL) write(c, [i][0:m])
+  #pragma acc loop gang split(contiguous, 9, 7) read(a[i][0:p], b[0:p][0:m]) write(c[i][0:m])
   for (i = 0; i < n; i++) {
     #pragma acc loop worker
     for (j = 0; j < m; j++) {

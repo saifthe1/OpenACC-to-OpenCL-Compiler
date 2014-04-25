@@ -5,9 +5,9 @@ data(a, float, section(2, 0, n, 0, p), acc(copyin))
 data(b, float, section(2, 0, p, 0, m), acc(copyin))
 data(c, float, section(2, 0, n, 0, m), acc(copyout))
 region(
-  acc(),
+  acc(devices(acc_nvidia_device, 0, acc_xeonphi_device, 0)),
   loop(
-    i, 0, n, acc(gang),
+    i, 0, n, acc(gang, split(contiguous, 9, 7), read(a[i][0:p], b[0:p][0:m]), write(c[i][0:m])),
     loop(
       j, 0, m, acc(worker),
       stmt(c[i][j] = 0;),
