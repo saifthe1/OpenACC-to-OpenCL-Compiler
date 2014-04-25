@@ -1,0 +1,34 @@
+
+all: tuner-test-1 tuner-test-2
+
+tuner-test-1: tuner-test-1.c
+	gcc \
+          -I@top_srcdir@/libopenacc/include \
+	  -I@opencl_inc_path@ \
+	  -I@sqlite_inc_path@ \
+          -DLIBOPENACC_DIR=\"@top_srcdir@/libopenacc/lib\" \
+          -DKERNEL_DIR=\"@srcdir@\" \
+          -L@top_srcdir@/libopenacc/lib -lopenacc \
+          -L@opencl_lib_path@ -lOpenCL \
+          -L@sqlite_lib_path@ -lsqlite3 \
+          -lrt tuner-test-1.c -o tuner-test-1
+
+tuner-test-2: tuner-test-2.c
+	gcc \
+          -I@top_srcdir@/libopenacc/include \
+	  -I@opencl_inc_path@ \
+	  -I@sqlite_inc_path@ \
+          -DLIBOPENACC_DIR=\"@top_srcdir@/libopenacc/lib\" \
+          -DKERNEL_DIR=\"@srcdir@\" \
+          -L@top_srcdir@/libopenacc/lib -lopenacc \
+          -L@opencl_lib_path@ -lOpenCL \
+          -L@sqlite_lib_path@ -lsqlite3 \
+          -lrt tuner-test-2.c -o tuner-test-2
+
+check: tuner-test-1 tuner-test-2
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@top_srcdir@/libopenacc/lib ACC_PROFILING_DB=test-1.db ./tuner-test-1 @top_srcdir@/tests/X09-tunning/versions.db
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@top_srcdir@/libopenacc/lib ACC_PROFILING_DB=test-2.db ./tuner-test-2 @top_srcdir@/tests/X09-tunning/versions.db
+
+clean:
+	rm -f tuner-test-1 tuner-test-2 *.sl3 *.db
+

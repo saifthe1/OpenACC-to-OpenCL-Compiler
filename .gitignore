@@ -16,10 +16,16 @@ rose.sh
 *.so
 *.a
 
+tests/tuner/Makefile
+tests/tuner/acc-tuner-generate
+tests/tuner/acc-tuner-execute
+
 tests/001/Makefile
 
 tests/002/Makefile
 tests/002/dev-list
+
+tests/003/Makefile
 
 tests/101/Makefile
 tests/101/libopenacc
