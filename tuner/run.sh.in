@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+export ACC_PATH=@abs_top_srcdir@
+
+export TUNER_EXEC=$ACC_PATH/tuner/acc-tuner-execute
+export TUNER_GEN=$ACC_PATH/tuner/acc-tuner-generate
+export VERSION_DB=$ACC_PATH/tests/X09-tunning/versions.db
+
+export DEVICE=M2070
+export ACC_PROFILING_DB=$DEVICE.db
+
+if [ ! -r $ACC_PROFILING_DB ]
+then
+  $TUNER_EXEC $VERSION_DB $DEVICE
+fi
+
+for n in 512 1024 2048 4096 8192
+do
+  for version_id in `seq 0 2089`
+  do
+    count=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"`
+    if [ $count -gt 0 ]
+    then
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='1' WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"
+      $TUNER_EXEC $VERSION_DB $DEVICE $version_id $n $n $n
+    fi
+  done
+done
+
