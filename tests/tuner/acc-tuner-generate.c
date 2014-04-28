@@ -43,7 +43,7 @@ int main(int argc, char ** argv) {
     exit(-1);
   }
 
-  sqlite3 * versions_db = acc_sqlite_open_db(argv[1], 1);
+  sqlite3 * versions_db = acc_sqlite_open(argv[1], 1);
 
   char * devices_name[1] = {argv[2]};
 
@@ -59,15 +59,15 @@ int main(int argc, char ** argv) {
       for (i = 0; i < num_versions; i++)
         ranges_per_devices[0].version_ids[i] = i;
 
-    size_t gang_exp_min = 4;
-    size_t gang_exp_max = 9;
+    size_t gang_exp_min = 7;
+    size_t gang_exp_max = 13;
     ranges_per_devices[0].num_gang_values = gang_exp_max - gang_exp_min + 1;
     ranges_per_devices[0].gang_values = malloc(ranges_per_devices[0].num_gang_values * sizeof(size_t));
     for (exp = gang_exp_min; exp <= gang_exp_max; exp++)
       ranges_per_devices[0].gang_values[exp - gang_exp_min] = power_of_2[exp];
 
-    size_t worker_exp_min = 4;
-    size_t worker_exp_max = 9;
+    size_t worker_exp_min = 6;
+    size_t worker_exp_max = 10;
     ranges_per_devices[0].num_worker_values = worker_exp_max - worker_exp_min + 1;
     ranges_per_devices[0].worker_values = malloc(ranges_per_devices[0].num_worker_values * sizeof(size_t));
     for (exp = worker_exp_min; exp <= worker_exp_max; exp++)
@@ -80,28 +80,36 @@ int main(int argc, char ** argv) {
     for (exp = vector_exp_min; exp <= vector_exp_max; exp++)
       ranges_per_devices[0].vector_values[exp - vector_exp_min] = power_of_2[exp];
 
-  size_t params_exp_min = 8;
-  size_t params_exp_max = 13;
+  size_t params_exp_min = 9;
+  size_t params_exp_max = 16;
   size_t num_params_seeds = params_exp_max - params_exp_min + 1;
   size_t * params_seeds = malloc(num_params_seeds * sizeof(size_t));
   for (exp = params_exp_min; exp <= params_exp_max; exp++)
     params_seeds[exp - params_exp_min] = power_of_2[exp];
 
-  size_t num_params_values = num_params_seeds * num_params_seeds * num_params_seeds;
-  size_t * params_values = malloc(3 * num_params_values * sizeof(size_t));
+  size_t max_alloc_size = power_of_2[30];
+  size_t max_num_params_values = num_params_seeds * num_params_seeds * num_params_seeds;
+  size_t num_params_values = 0;
+  size_t * params_values = malloc(3 * max_num_params_values * sizeof(size_t));
   for (i = 0; i < num_params_seeds; i++)
     for (j = 0; j < num_params_seeds; j++)
       for (k = 0; k < num_params_seeds; k++) {
-         params_values[((i * num_params_seeds + j) * num_params_seeds + k) * 3 + 0] = params_seeds[i];
-         params_values[((i * num_params_seeds + j) * num_params_seeds + k) * 3 + 1] = params_seeds[j];
-         params_values[((i * num_params_seeds + j) * num_params_seeds + k) * 3 + 2] = params_seeds[k];
-      }
+         size_t alloc_size = (params_seeds[i] * params_seeds[j] + params_seeds[i] * params_seeds[k] + params_seeds[j] * params_seeds[k]) * sizeof(float);
+         if (alloc_size <= max_alloc_size) {
+           params_values[3 * num_params_values + 0] = params_seeds[i];
+           params_values[3 * num_params_values + 1] = params_seeds[j];
+           params_values[3 * num_params_values + 2] = params_seeds[k];
+           num_params_values++;
+         }
+       }
 
   struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(3, "n", e_sqlite_int, "m", e_sqlite_int, "p", e_sqlite_int);
 
   acc_tuning_init(1, devices_name, ranges_per_devices, data_params, num_params_values, params_values, 1, &loop_length_matmul, versions_db);
 
-  sqlite3_close(versions_db);
+  acc_sqlite_close(versions_db);
+
+  acc_profiling_exit();
 
   return 0;
 }

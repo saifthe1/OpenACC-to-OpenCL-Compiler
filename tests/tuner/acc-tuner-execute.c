@@ -74,7 +74,7 @@ int main(int argc, char ** argv) {
   }
 
   // Load versions DB
-  sqlite3 * versions_db = acc_sqlite_open_db(argv[1], 1);
+  sqlite3 * versions_db = acc_sqlite_open(argv[1], 1);
 
   char * devices_name[1] = {argv[2]};
 
@@ -85,7 +85,25 @@ int main(int argc, char ** argv) {
   size_t p = atoi(argv[6]);
 
   // Load 'compiler_data' from version DB
-  acc_sqlite_load_compiler_data(versions_db);
+  {
+    struct acc_sqlite_load_compiler_data_filter_t_ * filter = malloc(sizeof(struct acc_sqlite_load_compiler_data_filter_t_));
+      filter->enabled_versions = malloc(sizeof(size_t *));
+      filter->num_enabled_versions = malloc(sizeof(size_t));
+      filter->region_offset = malloc(sizeof(size_t));
+
+      filter->region_offset[0] = 0;
+      filter->num_enabled_versions[0] = 1;
+      filter->enabled_versions[0] = malloc(sizeof(size_t));
+      filter->enabled_versions[0][0] = version_id;
+
+    acc_sqlite_load_compiler_data(versions_db, filter);
+
+    free(filter->enabled_versions[0]);
+    free(filter->enabled_versions);
+    free(filter->num_enabled_versions);
+    free(filter->region_offset);
+    free(filter);
+  }
 
   // Build data parameter descriptor to read paramter from Experiments DB
   struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(3, "n", e_sqlite_int, "m", e_sqlite_int, "p", e_sqlite_int);
@@ -101,8 +119,6 @@ int main(int argc, char ** argv) {
     region->devices     = NULL;
     region->num_distributed_data = 0;
     region->distributed_data     = NULL;
-    region->num_options = 1;
-    region->options     = malloc(region->num_options * sizeof(char *));
 
   // Get/Init kernel descriptor
   assert(region->num_kernels == 1);
@@ -115,12 +131,6 @@ int main(int argc, char ** argv) {
     kernel->size_scalars = NULL;
     kernel->num_datas = 3;
     kernel->num_loops = 3; // Should be loaded from DB, but CG save 0 in the corresponding field...
-
-  // Set OpenCL compiler options to enable the version of the kernel we are going to use. 
-  region->options[0] = malloc((10 + strlen(kernel->name) + strlen(kernel->versions[version_id]->suffix)) * sizeof(char));
-  sprintf(region->options[0], "-DENABLE_%s%s", kernel->name, kernel->versions[version_id]->suffix);
-
-  printf("region->options[0] = %s\n", region->options[0]);
 
   // Initialize data
   float ** a, ** b, ** c;
@@ -184,7 +194,7 @@ int main(int argc, char ** argv) {
 
   free_data(a, b, c);
 
-  sqlite3_close(versions_db);
+  acc_sqlite_close(versions_db);
 
   return 0;
 }
