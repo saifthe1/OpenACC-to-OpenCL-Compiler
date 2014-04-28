@@ -1,0 +1,43 @@
+
+LIBOPENACC_PATH?=/media/ssd/projects/currents/acc2ocl-multidev/libopenacc
+
+LIBOPENACC_INC=-I$(LIBOPENACC_PATH)/include
+LIBOPENACC_LIB=-L$(LIBOPENACC_PATH)/lib -lopenacc
+
+OPENCL_INC=-I/usr/include
+OPENCL_LIB=-L/usr/lib -lOpenCL
+
+SQLITE_INC=-I/media/ssd/lib/sqlite/include
+SQLITE_LIB=-L/media/ssd/lib/sqlite/lib -lsqlite3
+
+KERNEL_DIR=/media/ssd/projects/currents/acc2ocl-multidev/tests/X09-tunning
+
+C_DEFINES+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR)\"
+
+C_INCLUDES+=$(LIBOPENACC_INC) $(OPENCL_INC) $(SQLITE_INC)
+
+LD_LIBS+=$(LIBOPENACC_LIB) $(OPENCL_LIB) $(SQLITE_LIB) -lrt
+
+CC=gcc
+C_FLAGS+=-O0 -g $(C_INCLUDES) $(C_DEFINES)
+
+LD=gcc
+LD_FLAGS+=$(LD_LIBS)
+
+all: acc-tuner-generate acc-tuner-execute
+
+%.o: %.c
+	$(CC) $(C_FLAGS) -c $? -o $@
+
+acc-tuner-generate: acc-tuner-generate.o
+	$(LD) $(LD_FLAGS) acc-tuner-generate.o -o acc-tuner-generate
+
+acc-tuner-execute: acc-tuner-execute.o
+	$(LD) $(LD_FLAGS) acc-tuner-execute.o -o acc-tuner-execute
+
+check: all
+#	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(LIBOPENACC_PATH)/lib ACC_PROFILING_DB=test.db ./tuner $(KERNEL_DIR)/versions.db
+
+clean:
+	rm -f acc-tuner-generate.o acc-tuner-execute.o acc-tuner-generate acc-tuner-execute test.db
+

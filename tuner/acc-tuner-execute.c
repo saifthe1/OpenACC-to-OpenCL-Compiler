@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
   size_t m = atoi(argv[5]);
   size_t p = atoi(argv[6]);
 
-  // Load 'compiler_data' from version DB
+  // Load 'compiler_data' from version DB (loads only the version we will use)
   {
     struct acc_sqlite_load_compiler_data_filter_t_ * filter = malloc(sizeof(struct acc_sqlite_load_compiler_data_filter_t_));
       filter->enabled_versions = malloc(sizeof(size_t *));

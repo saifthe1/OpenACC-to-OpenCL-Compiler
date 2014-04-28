@@ -5,8 +5,8 @@ dev-list: dev-list.c
 	gcc \
           -I@top_srcdir@/libopenacc/include \
 	  -I@opencl_inc_path@ \
-          -DLIBOPENACC_DIR=\"@top_srcdir@/libopenacc/lib\" \
-          -DKERNEL_DIR=\"@srcdir@\" \
+          -DLIBOPENACC_DIR=\"@abs_top_srcdir@/libopenacc/lib\" \
+          -DKERNEL_DIR=\"@abs_srcdir@\" \
           -L@top_srcdir@/libopenacc/lib -lopenacc \
           -L@opencl_lib_path@ -lOpenCL \
           -L@sqlite_lib_path@ -lsqlite3 \

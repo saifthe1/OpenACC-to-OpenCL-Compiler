@@ -49,10 +49,9 @@ else
 fi
 
 AC_OUTPUT(libopenacc/lib/Makefile)
-AC_OUTPUT(tests/tuner/Makefile)
+AC_OUTPUT(tuner/Makefile)
 AC_OUTPUT(tests/001/Makefile)
 AC_OUTPUT(tests/002/Makefile)
-AC_OUTPUT(tests/003/Makefile)
 AC_OUTPUT(tests/101/Makefile)
 AC_OUTPUT(tests/102/Makefile)
 AC_OUTPUT(tests/103/Makefile)
