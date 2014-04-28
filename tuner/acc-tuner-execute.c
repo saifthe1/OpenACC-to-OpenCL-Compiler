@@ -74,7 +74,7 @@ int main(int argc, char ** argv) {
   }
 
   // Load versions DB
-  sqlite3 * versions_db = acc_sqlite_open(argv[1], 1);
+  sqlite3 * versions_db = acc_sqlite_open(argv[1], 1, 1);
 
   char * devices_name[1] = {argv[2]};
 

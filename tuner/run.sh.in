@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 export ACC_PATH=@abs_top_srcdir@
 
 export TUNER_EXEC=$ACC_PATH/tuner/acc-tuner-execute
@@ -11,21 +9,76 @@ export VERSION_DB=$ACC_PATH/tests/X09-tunning/versions.db
 export DEVICE=M2070
 export ACC_PROFILING_DB=$DEVICE.db
 
+# Generate the list of runs if needed
+
 if [ ! -r $ACC_PROFILING_DB ]
 then
-  $TUNER_EXEC $VERSION_DB $DEVICE
+  $TUNER_GEN $VERSION_DB $DEVICE
 fi
 
-for n in 512 1024 2048 4096 8192
+# First: executes for square matrices (n == m == p)
+
+for n in 512 1024 2048 4096 8192 16384 32768 65536
 do
-  for version_id in `seq 0 2089`
+  version_ids=`sqlite3 $ACC_PROFILING_DB "SELECT version_id FROM runs WHERE n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"`
+  for version_id in $version_ids
   do
     count=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"`
-    if [ $count -gt 0 ]
+    if [ $count -eq 0 ]
     then
+      continue
+    fi
+
+    echo "For Version #$version_id for n = $n, m = $n, and p = $n, $count runs to execute"
+    while [ `sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"` -gt 0 ]
+    do
       sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='1' WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='0'"
       $TUNER_EXEC $VERSION_DB $DEVICE $version_id $n $n $n
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='0' WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='1'"
+    done
+
+    count_inv=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='2'"`
+    if [ $count_inv -gt 0 ]
+    then
+      echo "Following $count_inv/$count runs could not be executed:"
+      sqlite3 $ACC_PROFILING_DB "SELECT rowid, * FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$n' AND p=='$n' AND executed='2'"
     fi
   done
+done
+
+# Second: executes all remaining
+
+for n in 512 1024 2048 4096 8192 16384 32768 65536
+do
+for m in 512 1024 2048 4096 8192 16384 32768 65536
+do
+for p in 512 1024 2048 4096 8192 16384 32768 65536
+do
+  version_ids=`sqlite3 $ACC_PROFILING_DB "SELECT version_id FROM runs WHERE n=='$n' AND m=='$m' AND p=='$p' AND executed='0'"`
+  for version_id in $version_ids
+  do
+    count=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='0'"`
+    if [ $count -eq 0 ]
+    then
+      continue
+    fi
+
+    echo "For Version #$version_id for n = $n, m = $m, and p = $p, $count runs to execute"
+    while [ `sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='0'"` -gt 0 ]
+    do
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='1' WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='0'"
+      $TUNER_EXEC $VERSION_DB $DEVICE $version_id $n $m $p
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='0' WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='1'"
+    done
+
+    count_inv=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='2'"`
+    if [ $count_inv -gt 0 ]
+    then
+      echo "Following $count_inv/$count runs failed:"
+      sqlite3 $ACC_PROFILING_DB "SELECT rowid, * FROM runs WHERE version_id=='$version_id' AND n=='$n' AND m=='$m' AND p=='$p' AND executed='2'"
+    fi
+  done
+done
+done
 done
 
