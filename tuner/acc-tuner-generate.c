@@ -45,6 +45,11 @@ int main(int argc, char ** argv) {
 
   sqlite3 * versions_db = acc_sqlite_open(argv[1], 1, 1);
 
+  // Pre-open profile DB as in-memory DB
+  acc_profiler = acc_profiler_build_profiler();
+  acc_profiling_get_db_file_names();
+  acc_profiler->db_file = acc_sqlite_open(acc_profiler->db_file_name, 0, 1);
+
   char * devices_name[1] = {argv[2]};
 
   size_t power_of_2[36];
@@ -59,14 +64,14 @@ int main(int argc, char ** argv) {
       for (i = 0; i < num_versions; i++)
         ranges_per_devices[0].version_ids[i] = i;
 
-    size_t gang_exp_min = 7;
-    size_t gang_exp_max = 13;
+    size_t gang_exp_min = 3;
+    size_t gang_exp_max = 5;
     ranges_per_devices[0].num_gang_values = gang_exp_max - gang_exp_min + 1;
     ranges_per_devices[0].gang_values = malloc(ranges_per_devices[0].num_gang_values * sizeof(size_t));
     for (exp = gang_exp_min; exp <= gang_exp_max; exp++)
       ranges_per_devices[0].gang_values[exp - gang_exp_min] = power_of_2[exp];
 
-    size_t worker_exp_min = 6;
+    size_t worker_exp_min = 5;
     size_t worker_exp_max = 10;
     ranges_per_devices[0].num_worker_values = worker_exp_max - worker_exp_min + 1;
     ranges_per_devices[0].worker_values = malloc(ranges_per_devices[0].num_worker_values * sizeof(size_t));
@@ -80,8 +85,8 @@ int main(int argc, char ** argv) {
     for (exp = vector_exp_min; exp <= vector_exp_max; exp++)
       ranges_per_devices[0].vector_values[exp - vector_exp_min] = power_of_2[exp];
 
-  size_t params_exp_min = 9;
-  size_t params_exp_max = 16;
+  size_t params_exp_min = 6;
+  size_t params_exp_max = 12;
   size_t num_params_seeds = params_exp_max - params_exp_min + 1;
   size_t * params_seeds = malloc(num_params_seeds * sizeof(size_t));
   for (exp = params_exp_min; exp <= params_exp_max; exp++)

@@ -73,6 +73,10 @@ benchmark/execute_min.sh
 benchmark/process.sh
 benchmark/config.rc
 
+tuner/run.sh
+tuner/acc-tuner-generate
+tuner/acc-tuner-execute
+
 *.log
 *.db
 *.sl3
