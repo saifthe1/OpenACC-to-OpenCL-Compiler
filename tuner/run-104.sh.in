@@ -2,12 +2,12 @@
 
 export ACC_PATH=@abs_top_srcdir@
 
-export TUNER_EXEC=$ACC_PATH/tuner/acc-tuner-execute-103
-export TUNER_GEN=$ACC_PATH/tuner/acc-tuner-generate-103
-export VERSION_DB=$ACC_PATH/tuner/103/versions.db
+export TUNER_EXEC=$ACC_PATH/tuner/acc-tuner-execute-104
+export TUNER_GEN=$ACC_PATH/tuner/acc-tuner-generate-104
+export VERSION_DB=$ACC_PATH/tuner/104/versions.db
 
 export DEVICE=I7-3610QM
-export ACC_PROFILING_DB=103/$DEVICE.db
+export ACC_PROFILING_DB=$ACC_PATH/tuner/104/$DEVICE.db
 
 # Generate the list of runs if needed
 

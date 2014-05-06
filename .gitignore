@@ -39,6 +39,10 @@ tests/103/Makefile
 tests/103/libopenacc
 tests/103/reference
 
+tests/104/Makefile
+tests/104/libopenacc
+tests/104/reference
+
 tests/109/Makefile
 tests/109/libopenacc
 tests/109/reference
@@ -73,13 +77,18 @@ benchmark/execute_min.sh
 benchmark/process.sh
 benchmark/config.rc
 
+tuner/Makefile
 tuner/run-103.sh
+tuner/run-104.sh
 tuner/run-109.sh
 tuner/acc-tuner-generate-103
+tuner/acc-tuner-generate-104
 tuner/acc-tuner-generate-109
 tuner/acc-tuner-execute-103
+tuner/acc-tuner-execute-104
 tuner/acc-tuner-execute-109
 tuner/acc-tuner-process-103
+tuner/acc-tuner-process-104
 tuner/acc-tuner-process-109
 
 *.log

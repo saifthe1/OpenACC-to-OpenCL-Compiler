@@ -51,12 +51,14 @@ fi
 AC_OUTPUT(libopenacc/lib/Makefile)
 AC_OUTPUT(tuner/Makefile)
 AC_OUTPUT(tuner/run-103.sh)
+AC_OUTPUT(tuner/run-104.sh)
 AC_OUTPUT(tuner/run-109.sh)
 AC_OUTPUT(tests/001/Makefile)
 AC_OUTPUT(tests/002/Makefile)
 AC_OUTPUT(tests/101/Makefile)
 AC_OUTPUT(tests/102/Makefile)
 AC_OUTPUT(tests/103/Makefile)
+AC_OUTPUT(tests/104/Makefile)
 AC_OUTPUT(tests/109/Makefile)
 AC_OUTPUT(tests/501/Makefile)
 AC_OUTPUT(tests/509/Makefile)
@@ -69,6 +71,7 @@ AC_OUTPUT(rose.sh)
 
 chmod +x rose.sh
 chmod +x tuner/run-103.sh
+chmod +x tuner/run-104.sh
 chmod +x tuner/run-109.sh
 chmod +x tests/X09-tunning/execute-109.sh
 
