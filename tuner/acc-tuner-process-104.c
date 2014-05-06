@@ -29,7 +29,7 @@ acc_compiler_data_t compiler_data = {
 float eval_vectadd_performance(void * params, long start, long end) {
   size_t n = *(size_t *)params;
 
-  return (2. * n) / (1. * (end - start));
+  return (1. * n) / (1. * (end - start));
 }
 
 struct acc_tuner_version_perf_data_t {
@@ -133,12 +133,12 @@ int acc_tuner_param_perf_callback(void * user_data, int cnt, char ** values, cha
 }
 
 void acc_tuner_generate_performance_per_param_table() {
-  acc_sqlite_create_table(acc_tuner->versions_db, "ParamPerf", "n INT, m INT, p INT, min_run_id INT, min_version_id INT, min_gflops FLOAT, max_run_id INT, max_version_id INT, max_gflops FLOAT, ave_gflops FLOAT");
+  acc_sqlite_create_table(acc_tuner->versions_db, "ParamPerf", "n INT, min_run_id INT, min_version_id INT, min_gflops FLOAT, max_run_id INT, max_version_id INT, max_gflops FLOAT, ave_gflops FLOAT");
 
   size_t i;
-  size_t power_of_2[15];
+  size_t power_of_2[31];
   power_of_2[0] = 1;
-  for (i = 1; i < 15; i++)
+  for (i = 1; i < 31; i++)
     power_of_2[i] = power_of_2[i-1] * 2;
 
   char query[200];
@@ -148,7 +148,7 @@ void acc_tuner_generate_performance_per_param_table() {
   struct acc_tuner_param_perf_data_t * perf_data = malloc(sizeof(struct acc_tuner_param_perf_data_t));
 
   size_t n_exp;
-  for (n_exp = 5; n_exp < 14; n_exp++) {
+  for (n_exp = 5; n_exp < 31; n_exp++) {
     perf_data->min_run_id = -1; 
     perf_data->min_version_id = -1; 
     perf_data->min_gflops = 1000000000;
@@ -213,7 +213,7 @@ void acc_tuner_generate_performance_table(
 
   size_t num_entries = acc_sqlite_read_run_table(
                          acc_profiler->db_file, acc_tuner->num_devices, acc_tuner->data_params, 1, runs_conds,
-                         &entry_size, &run_entries, &num_fields, &field_names, &field_types, &field_sizes, &field_offsets, "run_id"
+                         &entry_size, &run_entries, &num_fields, &field_names, &field_types, &field_sizes, &field_offsets, NULL
                        );
 
   size_t query_length = 0;
@@ -253,9 +253,11 @@ void acc_tuner_generate_performance_table(
     size_t gang = *(size_t *)(run_entries + i * entry_size + field_offsets[3]);
     size_t worker = *(size_t *)(run_entries + i * entry_size + field_offsets[4]);
     float gflops = 0;
-    for (j = 0; j < num_events; j++)
-      gflops += (*eval_performance)(run_entries + i * entry_size + field_offsets[6], event_entries[j].cl_profiling_command_start, event_entries[j].cl_profiling_command_end);
-    gflops /= num_events;
+    for (j = 0; j < num_events; j++) {
+      float tmp = (*eval_performance)(run_entries + i * entry_size + field_offsets[6], event_entries[j].cl_profiling_command_start, event_entries[j].cl_profiling_command_end);
+      if (tmp > gflops)
+        gflops = tmp;
+    }
 
     char run_id_str[32];
     sprintf(run_id_str, "'%zd', ", run_id);
@@ -357,7 +359,7 @@ int main(int argc, char ** argv) {
   assert(acc_sqlite_table_exists(acc_profiler->db_file, "Runs"));
   assert(acc_sqlite_table_exists(acc_profiler->db_file, "Events"));
 
-  struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(3, "n", e_sqlite_int);
+  struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(1, "n", e_sqlite_int);
 
   acc_tuning_init(1, devices_name, data_params, versions_db);
 

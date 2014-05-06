@@ -7,17 +7,17 @@ export TUNER_GEN=$ACC_PATH/tuner/acc-tuner-generate-103
 export VERSION_DB=$ACC_PATH/tuner/103/versions.db
 
 export DEVICE=I7-3610QM
-export ACC_PROFILING_DB=103/$DEVICE.db
+export ACC_PROFILING_DB=$ACC_PATH/tuner/103/$DEVICE.db
 
 # Generate the list of runs if needed
 
 if [ ! -r $ACC_PROFILING_DB ]
 then
-  $TUNER_GEN $VERSION_DB $DEVICE 3 5 5 10 0 0 10 25 30
+  $TUNER_GEN $VERSION_DB $DEVICE 3 13 5 13 0 0 10 28 30
 fi
 
 n=512
-for i in `seq 10 25`
+for i in `seq 10 28`
 do
   n=$(($n*2))
 
