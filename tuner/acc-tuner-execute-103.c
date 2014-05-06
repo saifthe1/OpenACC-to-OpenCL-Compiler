@@ -15,8 +15,6 @@
 
 #include <assert.h>
 
-#include <assert.h>
-
 acc_compiler_data_t compiler_data = {
   (const char * ) LIBOPENACC_DIR, /* Absolute directory for OpenACC runtime (needed to compile OpenCL C codes) */
   (const char * ) "lib/opencl/libopenacc.cl",  /* Name of the OpenCL C runtime file */
@@ -24,65 +22,47 @@ acc_compiler_data_t compiler_data = {
   0, NULL
 };
 
-void init_data(size_t n, size_t m, size_t p, float *** a, float *** b, float *** c) {
-  size_t i, j;
 
-  float * data;
-  float ** tmp;
 
-  data = (float*)malloc(n * p * sizeof(float));
-  for (i = 0; i < n*p; i++)
-    data[i] = i; //rand() * 1. / rand();
-  tmp = (float**)malloc(n * sizeof(float*));
+void init_data(size_t n, float ** a, float ** b, float ** c) {
+  size_t i;
+
+  *a = (float*)malloc(n * sizeof(float));
   for (i = 0; i < n; i++)
-    tmp[i] = &(data[i * p]);
-  *a = tmp;
+    (*a)[i] = i;
 
-  data = (float*)malloc(p * m * sizeof(float));
-  for (i = 0; i < p*m; i++)
-    data[i] = i; //rand() * 1. / rand();
-  tmp = (float**)malloc(p * sizeof(float*));
-  for (i = 0; i < p; i++)
-    tmp[i] = &(data[i * m]);
-  *b = tmp;
-
-  data = (float*)malloc(n * m * sizeof(float));
-  for (i = 0; i < n*m; i++)
-    data[i] = 0;
-  tmp = (float**)malloc(n * sizeof(float*));
+  *b = (float*)malloc(n * sizeof(float));
   for (i = 0; i < n; i++)
-    tmp[i] = &(data[i * m]);
-  *c = tmp;
+    (*b)[i] = i;
+
+  *c = (float*)malloc(n * sizeof(float));
+  for (i = 0; i < n; i++)
+    (*c)[i] = 0;
 }
 
-void free_data(float ** a, float ** b, float ** c) {
-  free(a[0]);
+void free_data(float * a, float * b, float * c) {
   free(a);
-
-  free(b[0]);
   free(b);
-
-  free(c[0]);
   free(c);
 }
 
 int main(int argc, char ** argv) {
 
-  if (argc != 7) {
-    printf("usage: %s version_db device_name version_id n m p\n", argv[0]);
+  if (argc != 5) {
+    printf("usage: %s version_db device_name version_id n\n", argv[0]);
     exit(-1);
   }
 
   // Load versions DB
   sqlite3 * versions_db = acc_sqlite_open(argv[1], 1, 1);
 
+  acc_profiling_init();
+
   char * devices_name[1] = {argv[2]};
 
   // Get arguments
   size_t version_id = atoi(argv[3]);
   size_t n = atoi(argv[4]);
-  size_t m = atoi(argv[5]);
-  size_t p = atoi(argv[6]);
 
   // Load 'compiler_data' from version DB (loads only the version we will use)
   {
@@ -106,10 +86,10 @@ int main(int argc, char ** argv) {
   }
 
   // Build data parameter descriptor to read paramter from Experiments DB
-  struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(3, "n", e_sqlite_int, "m", e_sqlite_int, "p", e_sqlite_int);
+  struct acc_tuner_data_params_desc_t_ * data_params = acc_tuning_build_data_params(1, "n", e_sqlite_int);
 
   // Initialize the tuner
-  assert(acc_tuning_init(1, devices_name, NULL, data_params, 0, NULL, 0, NULL, versions_db) == 0);
+  acc_tuning_init(1, devices_name, data_params, versions_db);
 
   // Get/Init region descriptor
   assert(compiler_data.num_regions == 1);
@@ -124,17 +104,17 @@ int main(int argc, char ** argv) {
   assert(region->num_kernels == 1);
   assert(region->kernels[0] != NULL);
   struct acc_kernel_desc_t_ * kernel = region->kernels[0];
-    size_t size_params[3] = {sizeof(int), sizeof(int), sizeof(int)};
-    kernel->num_params    = 3;
+    size_t size_params[1] = {sizeof(int)};
+    kernel->num_params    = 1;
     kernel->size_params   = size_params;
     kernel->num_scalars  = 0;
     kernel->size_scalars = NULL;
     kernel->num_datas = 3;
-    kernel->num_loops = 3; // Should be loaded from DB, but CG save 0 in the corresponding field...
+    kernel->num_loops = 1; // Should be loaded from DB, but CG save 0 in the corresponding field...
 
   // Initialize data
-  float ** a, ** b, ** c;
-  init_data(n, m, p, &a, &b, &c);
+  float * a, * b, * c;
+  init_data(n, &a, &b, &c);
 
   // Construct execution data
   struct acc_tuner_exec_data_t * exec_data = malloc(sizeof(struct acc_tuner_exec_data_t));
@@ -148,31 +128,19 @@ int main(int argc, char ** argv) {
     exec_data->kernel = acc_build_kernel(kernel);
       // Set kernel's parameters
       exec_data->kernel->param_ptrs[0] = &n;
-      exec_data->kernel->param_ptrs[1] = &m;
-      exec_data->kernel->param_ptrs[2] = &p;
 
       // Set kernel's data pointers
-      exec_data->kernel->data_ptrs[0] = a[0];
-      exec_data->kernel->data_size[0] = n * p * sizeof(float);
-      exec_data->kernel->data_ptrs[1] = b[0];
-      exec_data->kernel->data_size[1] = p * m * sizeof(float);
-      exec_data->kernel->data_ptrs[2] = c[0];
-      exec_data->kernel->data_size[2] = n * m * sizeof(float);
+      exec_data->kernel->data_ptrs[0] = a;
+      exec_data->kernel->data_size[0] = n * sizeof(float);
+      exec_data->kernel->data_ptrs[1] = b;
+      exec_data->kernel->data_size[1] = n * sizeof(float);
+      exec_data->kernel->data_ptrs[2] = c;
+      exec_data->kernel->data_size[2] = n * sizeof(float);
 
       // Set kernel's loops i
       exec_data->kernel->loops[0]->lower = 0;
       exec_data->kernel->loops[0]->upper = n;
       exec_data->kernel->loops[0]->stride = 1;
-
-      // Set kernel's loops j
-      exec_data->kernel->loops[1]->lower = 0;
-      exec_data->kernel->loops[1]->upper = m;
-      exec_data->kernel->loops[1]->stride = 1;
-
-      // Set kernel's loops k
-      exec_data->kernel->loops[2]->lower = 0;
-      exec_data->kernel->loops[2]->upper = p;
-      exec_data->kernel->loops[2]->stride = 1;
 
     // Data to be copyin before kernel
     exec_data->num_data_in = 2;
@@ -190,7 +158,7 @@ int main(int argc, char ** argv) {
     exec_data->data_create = data_create;
 
   // Execute all configuration that match: version_id, n, m, p, and have not been previously executed
-  acc_tuning_execute(exec_data, version_id, n, m, p);
+  acc_tuning_execute(exec_data, version_id, n);
 
   free_data(a, b, c);
 

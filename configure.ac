@@ -50,7 +50,8 @@ fi
 
 AC_OUTPUT(libopenacc/lib/Makefile)
 AC_OUTPUT(tuner/Makefile)
-AC_OUTPUT(tuner/run.sh)
+AC_OUTPUT(tuner/run-103.sh)
+AC_OUTPUT(tuner/run-109.sh)
 AC_OUTPUT(tests/001/Makefile)
 AC_OUTPUT(tests/002/Makefile)
 AC_OUTPUT(tests/101/Makefile)
@@ -67,7 +68,8 @@ AC_OUTPUT(tests/scripts/environment.mk)
 AC_OUTPUT(rose.sh)
 
 chmod +x rose.sh
-chmod +x tuner/run.sh
+chmod +x tuner/run-103.sh
+chmod +x tuner/run-109.sh
 chmod +x tests/X09-tunning/execute-109.sh
 
 if test -d benchmark

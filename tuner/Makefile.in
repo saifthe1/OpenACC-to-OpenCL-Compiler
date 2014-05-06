@@ -10,34 +10,64 @@ OPENCL_LIB=-L@opencl_lib_path@ -lOpenCL
 SQLITE_INC=-I@sqlite_inc_path@
 SQLITE_LIB=-L@sqlite_lib_path@ -lsqlite3
 
-KERNEL_DIR=@abs_top_srcdir@/tests/X09-tunning
+KERNEL_DIR_103=@abs_top_srcdir@/tuner/103
 
-C_DEFINES+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR)\"
+C_DEFINES_103+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR_103)\"
+
+KERNEL_DIR_109=@abs_top_srcdir@/tests/X09-tunning
+
+C_DEFINES_109+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR_109)\"
 
 C_INCLUDES+=$(LIBOPENACC_INC) $(OPENCL_INC) $(SQLITE_INC)
 
 LD_LIBS+=$(LIBOPENACC_LIB) $(OPENCL_LIB) $(SQLITE_LIB) -lrt
 
 CC=gcc
-C_FLAGS+=-O0 -g $(C_INCLUDES) $(C_DEFINES)
+C_FLAGS+=-O2 -g $(C_INCLUDES)
 
 LD=gcc
 LD_FLAGS+=$(LD_LIBS)
 
-all: acc-tuner-generate acc-tuner-execute
+all: acc-tuner-generate-103 acc-tuner-execute-103 acc-tuner-process-103 acc-tuner-generate-109 acc-tuner-execute-109 acc-tuner-process-109
 
-%.o: %.c
-	$(CC) $(C_FLAGS) -c $? -o $@
+#
 
-acc-tuner-generate: acc-tuner-generate.o
-	$(LD) $(LD_FLAGS) acc-tuner-generate.o -o acc-tuner-generate
+%-103.o: %-103.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_103) -c $? -o $@
 
-acc-tuner-execute: acc-tuner-execute.o
-	$(LD) $(LD_FLAGS) acc-tuner-execute.o -o acc-tuner-execute
+%-109.o: %-109.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_109) -c $? -o $@
+
+#
+
+acc-tuner-generate-103: acc-tuner-generate-103.o
+	$(LD) $(LD_FLAGS) acc-tuner-generate-103.o -o acc-tuner-generate-103
+
+acc-tuner-execute-103: acc-tuner-execute-103.o
+	$(LD) $(LD_FLAGS) acc-tuner-execute-103.o -o acc-tuner-execute-103
+
+acc-tuner-process-103.o: acc-tuner-process-103.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_103) -fopenmp -c $? -o $@
+
+acc-tuner-process-103: acc-tuner-process-103.o
+	$(LD) $(LD_FLAGS) -fopenmp acc-tuner-process-103.o -o acc-tuner-process-103
+
+#
+
+acc-tuner-generate-109: acc-tuner-generate-109.o
+	$(LD) $(LD_FLAGS) acc-tuner-generate-109.o -o acc-tuner-generate-109
+
+acc-tuner-execute-109: acc-tuner-execute-109.o
+	$(LD) $(LD_FLAGS) acc-tuner-execute-109.o -o acc-tuner-execute-109
+
+acc-tuner-process-109.o: acc-tuner-process-109.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_109) -fopenmp -c $? -o $@
+
+acc-tuner-process-109: acc-tuner-process-109.o
+	$(LD) $(LD_FLAGS) -fopenmp acc-tuner-process-109.o -o acc-tuner-process-109
 
 check: all
-#	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(LIBOPENACC_PATH)/lib ACC_PROFILING_DB=test.db ./tuner $(KERNEL_DIR)/versions.db
 
 clean:
-	rm -f acc-tuner-generate.o acc-tuner-execute.o acc-tuner-generate acc-tuner-execute test.db
+	rm -f *.o acc-tuner-*-103 acc-tuner-*-109 test.db
 

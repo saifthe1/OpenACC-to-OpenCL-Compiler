@@ -1,0 +1,49 @@
+#!/bin/bash
+
+export ACC_PATH=@abs_top_srcdir@
+
+export TUNER_EXEC=$ACC_PATH/tuner/acc-tuner-execute-103
+export TUNER_GEN=$ACC_PATH/tuner/acc-tuner-generate-103
+export VERSION_DB=$ACC_PATH/tuner/103/versions.db
+
+export DEVICE=I7-3610QM
+export ACC_PROFILING_DB=103/$DEVICE.db
+
+# Generate the list of runs if needed
+
+if [ ! -r $ACC_PROFILING_DB ]
+then
+  $TUNER_GEN $VERSION_DB $DEVICE 3 5 5 10 0 0 10 25 30
+fi
+
+n=512
+for i in `seq 10 20`
+do
+  n=$(($n*2))
+
+  version_ids=`sqlite3 $ACC_PROFILING_DB "SELECT version_id FROM runs WHERE n=='$n' AND executed='0'"`
+  for version_id in $version_ids
+  do
+    count=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND executed='0'"`
+    if [ $count -eq 0 ]
+    then
+      continue
+    fi
+
+    echo "For Version #$version_id for n = $n, $count runs to execute"
+    while [ `sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND executed='0'"` -gt 0 ]
+    do
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='1' WHERE version_id=='$version_id' AND n=='$n' AND executed='0'"
+      $TUNER_EXEC $VERSION_DB $DEVICE $version_id $n
+      sqlite3 $ACC_PROFILING_DB "UPDATE runs SET executed='0' WHERE version_id=='$version_id' AND n=='$n' AND executed='1'"
+    done
+
+    count_inv=`sqlite3 $ACC_PROFILING_DB "SELECT count(*) FROM runs WHERE version_id=='$version_id' AND n=='$n' AND executed='2'"`
+    if [ $count_inv -gt 0 ]
+    then
+      echo "Following $count_inv/$count runs could not be executed:"
+      sqlite3 $ACC_PROFILING_DB "SELECT rowid, * FROM runs WHERE version_id=='$version_id' AND n=='$n' AND executed='2'"
+    fi
+  done
+done
+
