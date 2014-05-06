@@ -14,6 +14,10 @@ KERNEL_DIR_103=@abs_top_srcdir@/tuner/103
 
 C_DEFINES_103+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR_103)\"
 
+KERNEL_DIR_104=@abs_top_srcdir@/tuner/104
+
+C_DEFINES_104+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR_104)\"
+
 KERNEL_DIR_109=@abs_top_srcdir@/tests/X09-tunning
 
 C_DEFINES_109+=-DLIBOPENACC_DIR=\"$(LIBOPENACC_PATH)\" -DKERNEL_DIR=\"$(KERNEL_DIR_109)\"
@@ -28,12 +32,18 @@ C_FLAGS+=-O2 -g $(C_INCLUDES)
 LD=gcc
 LD_FLAGS+=$(LD_LIBS)
 
-all: acc-tuner-generate-103 acc-tuner-execute-103 acc-tuner-process-103 acc-tuner-generate-109 acc-tuner-execute-109 acc-tuner-process-109
+all: \
+	acc-tuner-generate-103 acc-tuner-execute-103 acc-tuner-process-103 \
+	acc-tuner-generate-104 acc-tuner-execute-104 acc-tuner-process-104 \
+	acc-tuner-generate-109 acc-tuner-execute-109 acc-tuner-process-109
 
 #
 
 %-103.o: %-103.c
 	$(CC) $(C_FLAGS) $(C_DEFINES_103) -c $? -o $@
+
+%-104.o: %-104.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_104) -c $? -o $@
 
 %-109.o: %-109.c
 	$(CC) $(C_FLAGS) $(C_DEFINES_109) -c $? -o $@
@@ -54,6 +64,20 @@ acc-tuner-process-103: acc-tuner-process-103.o
 
 #
 
+acc-tuner-generate-104: acc-tuner-generate-104.o
+	$(LD) $(LD_FLAGS) acc-tuner-generate-104.o -o acc-tuner-generate-104
+
+acc-tuner-execute-104: acc-tuner-execute-104.o
+	$(LD) $(LD_FLAGS) acc-tuner-execute-104.o -o acc-tuner-execute-104
+
+acc-tuner-process-104.o: acc-tuner-process-104.c
+	$(CC) $(C_FLAGS) $(C_DEFINES_104) -fopenmp -c $? -o $@
+
+acc-tuner-process-104: acc-tuner-process-104.o
+	$(LD) $(LD_FLAGS) -fopenmp acc-tuner-process-104.o -o acc-tuner-process-104
+
+#
+
 acc-tuner-generate-109: acc-tuner-generate-109.o
 	$(LD) $(LD_FLAGS) acc-tuner-generate-109.o -o acc-tuner-generate-109
 
@@ -69,5 +93,5 @@ acc-tuner-process-109: acc-tuner-process-109.o
 check: all
 
 clean:
-	rm -f *.o acc-tuner-*-103 acc-tuner-*-109 test.db
+	rm -f *.o acc-tuner-*-103 acc-tuner-*-104 acc-tuner-*-109 test.db
 
