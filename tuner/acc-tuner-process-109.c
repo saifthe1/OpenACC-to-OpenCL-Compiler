@@ -217,7 +217,7 @@ void acc_tuner_generate_performance_table(
 
   size_t num_entries = acc_sqlite_read_run_table(
                          acc_profiler->db_file, acc_tuner->num_devices, acc_tuner->data_params, 1, runs_conds,
-                         &entry_size, &run_entries, &num_fields, &field_names, &field_types, &field_sizes, &field_offsets, "run_id"
+                         &entry_size, &run_entries, &num_fields, &field_names, &field_types, &field_sizes, &field_offsets, NULL
                        );
 
   size_t query_length = 0;
